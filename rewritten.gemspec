@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency "vegas",           "~> 0.1.2"
 
   s.description = <<description
-    Rewritten is a simple Redis-backed Ruby library that facilitates using and refactoring 
+    Rewritten is a simple Redis-backed Ruby library that facilitates creating and refactoring 
     arbitrary urls in your Rack applications.
 
     Rewritten is inspired by the awesome Resque and Rack::Rewrite gems. It is

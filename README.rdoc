@@ -1,0 +1,19 @@
+= Rewritten 
+
+Rewritten is a simple Redis-backed Ruby library that facilitates creating and refactoring 
+arbitrary urls for your Rack applications.
+
+Rewritten is inspired by the awesome Resque and Rack::Rewrite gems. It is
+compromised of four parts:
+
+* A Ruby library for creating and modifying URLs for resources 
+* A Rack app that redirects old URLS and rewrites nice URLs to target 
+  path and params
+* A Rack app that rewrites links to their nice counterpart 
+* A Sinatra app for managing URLs 
+
+== Usage
+
+
+
+
