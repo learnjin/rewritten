@@ -1,5 +1,5 @@
 require "rewritten/version"
 
 module Rewritten
-  require 'rewritten/lib/server'
+  require 'rewritten/server'
 end
