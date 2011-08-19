@@ -18,7 +18,7 @@ Vegas::Runner.new(Rewritten::Server, 'rewritten-web', {
 }) do |runner, opts, app|
   opts.on('-N NAMESPACE', "--namespace NAMESPACE", "set the Redis namespace") {|namespace|
     runner.logger.info "Using Redis namespace '#{namespace}'"
-    Resque.redis.namespace = namespace
+    Rewritten.redis.namespace = namespace
   }
 end
 

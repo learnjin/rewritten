@@ -1,0 +1,30 @@
+
+<h1>Hits</h1>
+
+<p>
+This is a list of all successful or redirected hit paths.
+</p>
+
+<a href="<%= u('/hits/clear') %>">clear all!</a>
+
+
+<table class='queues' style="width: 90%">
+  <tr>
+    <th>PATH</th>
+    <th>Content-Type</th>
+    <th>Status</th>
+  </tr>
+
+  <% for h in Rewritten.all_hits %>
+    <tr>
+      <td class=''><%= h['path'] %></td>
+      <td class=''><%= h['content_type'] %></td>
+      <td class=''><%= h['code'] %></td>
+    </tr>
+  <% end %>
+
+</table>
+
+
+
+

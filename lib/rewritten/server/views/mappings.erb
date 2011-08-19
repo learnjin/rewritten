@@ -1,0 +1,61 @@
+
+<%# @subtabs = resque.queues unless partial? || params[:id].nil? %>
+
+<% if false and queue = params[:id] %>
+
+  <h1>Pending jobs on <span class='hl'><%= queue %></span></h1>
+  <form method="POST" action="<%=u "/queues/#{queue}/remove" %>" class='remove-queue'>
+    <input type='submit' name='' value='Remove Queue' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
+  </form>
+  <p class='sub'>Showing <%= start = params[:start].to_i + 1 %> to <%= start + 20 %> of <b><%=size = rewritten.size(queue)%></b> jobs</p>
+  <table class='jobs'>
+    <tr>
+      <th>Class</th>
+      <th>Args</th>
+    </tr>
+    <% for job in (jobs = rewritten.peek(queue, start, 20)) %>
+      <tr>
+        <td class='class'><%= job['class'] %></td>
+        <td class='args'><%=h job['args'].inspect %></td>
+      </tr>
+    <% end %>
+    <% if jobs.empty? %>
+      <tr>
+        <td class='no-data' colspan='2'>There are no pending jobs in this queue</td>
+      </tr>
+    <% end %>
+  </table>
+  <%= partial :next_more, :start => start, :size => size %>
+<% else %>
+
+
+
+  <h1 class='wi'>Translations</h1>
+
+  <p class='intro'>The list below contains all the registered translations from
+  url to target url.  Select a target from above to view all mappings for the
+  target.</p>
+
+  <a href="<%= u('/new') %>"> + New Mapping </a>
+
+  <p class='sub'>Showing <%= (start = params[:start].to_i)+1 %> to <%= start + Rewritten.per_page %> of <b><%=size = Rewritten.size('froms')%></b> translations. </p>
+
+  <table class='queues'>
+    <tr>
+      <th>from URL (Browser Location)</th>
+      <th>to URL (Your App)</th>
+    </tr>
+
+    <% for mapping in Rewritten.list_range("froms", params[:start].to_i, Rewritten.per_page) %>
+      <tr>
+        <td class=''><a href="<%= mapping %>" target="new"><%= mapping %></td>
+        <td class='queue'><a href="<%= u("/to?to=#{to=Rewritten.redis.get("from:#{mapping}")}") %>"><%= to %></td>
+        </tr>
+      <% end %>
+
+    </table>
+
+  <% end %>
+
+  <%= partial :next_more, :start => start, :size => size %>
+

@@ -1,18 +1,96 @@
 = Rewritten 
 
-Rewritten is a simple Redis-backed Ruby library that facilitates creating and refactoring 
-arbitrary urls for your Rack applications.
+Rewritten is a lookup-based rewriting engine that rewrites requested
+URLs on the fly. The URL manipulations depend on a translations found in
+a redis database.
 
-Rewritten is inspired by the awesome Resque and Rack::Rewrite gems. It is
-compromised of four parts:
+If a matching translation is found, the result is either a redirection
+to another translation or a modification of path and request parameters.
+If there is no matching translation, the request is left unmodified.
 
-* A Ruby library for creating and modifying URLs for resources 
-* A Rack app that redirects old URLS and rewrites nice URLs to target 
-  path and params
-* A Rack app that rewrites links to their nice counterpart 
-* A Sinatra app for managing URLs 
+Rewritten takes larges parts from the Resque codebase (which rocks). The
+gem is compromised of four parts:
 
-== Usage
+1. A Ruby library for creating, modifying and querying translations
+2. A Sinatra app for displaying and managing translations
+3. A Rack app for rewriting and redirecting request
+4. A Rack app for translating URLs in HTML pages
+5. A Rack app for recording successful request
+
+
+
+
+== Overview
+
+The Rewritten library allows you to create new URL translations and     
+then query for the current "trade language" of an URL.                  
+
+    Rewritten.add_translation('/apple-computer/newton', '/products/4e4d3c6a1d41c811e8000009')
+    Rewritten.add_translation('/apple/ipad', '/products/4e4d3c6a1d41c811e8000009')
+    Rewritten.get_current_translation('/products/4e4d3c6a1d41c811e8000009')         # => "/apple/ipad"
+
+Translations can be removed similarily.
+
+    Rewritten.remove_translation('/apple-computer/newton', '/products/4e4d3c6a1d41c811e8000009')
+
+
+== Usage in your Rack stack
+
+    use Rack::Rewritten
+    use Rack::Filter
+    run Your::App
+
+
+
+
+== The Front End
+
+Rewritten comes with a Sinatra-based front end for seeing and managing your URL translations (in the familiar Resque design). 
+
+
+[PICTURE]
+
+=== Standalone
+
+Running Rewritten as a gem in standalone mode is easy:
+
+    $ rewritten-web 
+
+It's based on Vegas, a thin layer around rackup, and as such configurable as well:
+
+    $ resque-web -p 8282
+
+
+=== Rack::URLMap
+
+To load Rewritten on a subpath alongside other apps you can make use of URLMap:
+
+run Rack::URLMap.new \
+    "/"       => Your::App.new,
+    "/resque" => Rewritten::Server.new
+    
+Check examples/demo/config.ru for a functional example (including HTTP basic auth).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

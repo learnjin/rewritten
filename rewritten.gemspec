@@ -17,7 +17,10 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
+  s.add_dependency "redis-namespace", "~> 1.0.2"
   s.add_dependency "vegas",           "~> 0.1.2"
+  s.add_dependency "sinatra",         ">= 0.9.2"
+  s.add_dependency "multi_json",      "~> 1.0"
 
   s.description = <<description
     Rewritten is a simple Redis-backed Ruby library that facilitates creating and refactoring 
@@ -27,8 +30,7 @@ Gem::Specification.new do |s|
     compromised of four parts:
 
     * A Ruby library for creating and modifying URLs for resources 
-    * A Rack app that redirects old URLS and rewrites nice URLs to target 
-      path and params
+    * A Rack app that takes care of redirecting old URLS in a SEO friendly matter
     * A Rack app that rewrites links to their nice counterpart 
     * A Sinatra app for managing URLs 
 description

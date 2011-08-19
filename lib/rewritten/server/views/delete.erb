@@ -1,0 +1,16 @@
+<div style="float:left">
+  <% if @from && @to %>  
+    <h2><%= @from %> -> <%= @to %> </h2>
+    <p>Are you sure you want to delete above translation?</p>
+    <form action='<%= u("/delete")%>' method="post" style="margin-top: 10px ">  
+      <input type="hidden" name="_method" value="delete">  
+      <input type="hidden" name="from" value="<%= @from %>">  
+      <input type="hidden" name="to" value="<%= @to %>">  
+      <input type="submit" value="Yes, Delete It!">  
+      <a href='<%= u("/to?to=#{@to}") %>'>Cancel</a>  
+    </form>  
+  <% else %>  
+    <p>Translation not found.</p>  
+  <% end %>
+</div>  
+
