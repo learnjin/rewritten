@@ -14,10 +14,8 @@ gem is compromised of four parts:
 1. A Ruby library for creating, modifying and querying translations
 2. A Sinatra app for displaying and managing translations
 3. A Rack app for rewriting and redirecting request
-4. A Rack app for translating URLs in HTML pages
+4. A Rack app for substituting URLs in HTML pages with their current translation
 5. A Rack app for recording successful request
-
-
 
 
 == Overview
@@ -29,9 +27,10 @@ then query for the current "trade language" of an URL.
     Rewritten.add_translation('/apple/ipad', '/products/4e4d3c6a1d41c811e8000009')
     Rewritten.get_current_translation('/products/4e4d3c6a1d41c811e8000009')         # => "/apple/ipad"
 
-Translations can be removed similarily.
+Translations are removed similarily.
 
     Rewritten.remove_translation('/apple-computer/newton', '/products/4e4d3c6a1d41c811e8000009')
+
 
 
 == Usage in your Rack stack
@@ -42,10 +41,10 @@ Translations can be removed similarily.
 
 
 
-
 == The Front End
 
-Rewritten comes with a Sinatra-based front end for seeing and managing your URL translations (in the familiar Resque design). 
+Rewritten comes with a Sinatra-based front end for dislaying and
+managing your URL translations (in the familiar Resque design).
 
 
 [PICTURE]
@@ -58,7 +57,7 @@ Running Rewritten as a gem in standalone mode is easy:
 
 It's based on Vegas, a thin layer around rackup, and as such configurable as well:
 
-    $ resque-web -p 8282
+    $ rewritten-web -p 8282
 
 
 === Rack::URLMap

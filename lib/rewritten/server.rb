@@ -152,7 +152,7 @@ module Rewritten
 
     post "/mappings" do
       if params[:from]!='' && params[:to]!=''
-        Rewritten.add_mapping(params[:from], params[:to])
+        Rewritten.add_translation(params[:from], params[:to])
         redirect u('overview')
       else
         show "new"
@@ -171,18 +171,18 @@ module Rewritten
     end
 
     post '/delete' do
+
       from = params[:from]
       to   = params[:to]
-      Rewritten.redis.del("from:#{from}")
-      Rewritten.redis.lrem("froms", 0, from)
-      Rewritten.redis.lrem("to:#{to}", 0, from)
-      # if this is the last translations remove resource as well
-      if Rewritten.size("to:#{to}") == 0
-        Rewritten.redis.lrem("tos", 0, to)
-        redirect u("/")
-      else
+
+      Rewritten.remove_translation(from, to)
+
+      if Rewritten.num_translations(to) > 0
         redirect u("/to?to=#{to}")
+      else
+        redirect u("/")
       end
+
     end
 
     get "/hits" do

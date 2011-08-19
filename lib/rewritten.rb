@@ -121,15 +121,40 @@ module Rewritten
   end
 
   #
-  # mapping manipulation
+  # translations 
   #
 
-  def add_mapping(from, to)
+  def add_translation(from, to)
     redis.set("from:#{from}", to)
     redis.lpush(:froms, from) 
     redis.lpush(:tos, to) 
     redis.rpush("to:#{to}", from) 
   end
+
+  def num_translations(to)
+    Rewritten.size("to:#{to}")
+  end
+
+  def remove_translation(from, to)
+    Rewritten.redis.del("from:#{from}")
+    Rewritten.redis.lrem("froms", 0, from)
+    Rewritten.redis.lrem("to:#{to}", 0, from)
+    Rewritten.redis.lrem("tos", 0, to) if num_translations(to) == 0
+ end
+
+  def get_current_translation(path)
+    to = Rewritten.redis.get("from:#{path}")
+    if to
+      # return current path
+      Rewritten.list_range("to:#{to}", -1, 1)  
+    else
+      # return path
+      path
+    end
+  end
+
+
+
 
   def add_hit(path, code, content_type)
     h = {:path => path, :code => code, :content_type => content_type}
@@ -142,17 +167,6 @@ module Rewritten
 
   def include?(path)
     Rewritten.redis.get("from:#{path}")
-  end
-
-  def get_current_mapping(path)
-    to = Rewritten.redis.get("from:#{path}")
-    if to
-      # return current path
-      Rewritten.list_range("to:#{to}", -1, 1)  
-    else
-      # return path
-      path
-    end
   end
 
   #
@@ -274,8 +288,6 @@ module Rewritten
     end
   end
 
-    <th>Last Access</th>
-    <th>Last Access</th>
   # This method can be used to conveniently remove a job from a queue.
   # It assumes the class you're passing it is a real Ruby class (not
   # a string or reference) which either:
