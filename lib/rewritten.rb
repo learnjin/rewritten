@@ -2,9 +2,9 @@ require 'redis/namespace'
 require 'rewritten/version'
 require 'rewritten/helpers'
 require 'rack/dummy'
-require 'rack/rewritten'
-require 'rack/hitter'
-require 'rack/filter'
+require 'rack/url'
+require 'rack/record'
+require 'rack/html'
 
 module Rewritten
   include Helpers
@@ -143,14 +143,17 @@ module Rewritten
  end
 
   def get_current_translation(path)
-    to = Rewritten.redis.get("from:#{path}")
-    if to
-      # return current path
-      Rewritten.list_range("to:#{to}", -1, 1)  
-    else
-      # return path
-      path
-    end
+    #to = Rewritten.redis.get("to:#{path}")
+    #if to
+    #  # return current path
+    #  Rewritten.list_range("to:#{to}", -1, 1)  
+    #else
+    #  # return path
+    #  path
+    #end
+    translation = Rewritten.list_range("to:#{path}", -1, 1)  
+    return translation if translation
+    return path
   end
 
 

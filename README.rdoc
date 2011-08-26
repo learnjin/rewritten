@@ -13,10 +13,9 @@ gem is compromised of four parts:
 
 1. A Ruby library for creating, modifying and querying translations
 2. A Sinatra app for displaying and managing translations
-3. A Rack app for rewriting and redirecting request
-4. A Rack app for substituting URLs in HTML pages with their current translation
-5. A Rack app for recording successful request
-
+3. A Rack app for rewriting and redirecting request (Rack::Rewritten::Url)
+4. A Rack app for substituting URLs in HTML pages with their current translation (Rack::Rewritten:Html)
+5. A Rack app for recording successful request (Rack::Rewritten::Record)
 
 == Overview
 
@@ -27,18 +26,16 @@ then query for the current "trade language" of an URL.
     Rewritten.add_translation('/apple/ipad', '/products/4e4d3c6a1d41c811e8000009')
     Rewritten.get_current_translation('/products/4e4d3c6a1d41c811e8000009')         # => "/apple/ipad"
 
-Translations are removed similarily.
+Translations are removed in a similar fashion.
 
     Rewritten.remove_translation('/apple-computer/newton', '/products/4e4d3c6a1d41c811e8000009')
 
 
-
 == Usage in your Rack stack
 
-    use Rack::Rewritten
-    use Rack::Filter
+    use Rack::Rewritten::Url
+    use Rack::Rewritten::Html
     run Your::App
-
 
 
 == The Front End

@@ -4,9 +4,9 @@ require 'rewritten'
 require 'rewritten/server'
 
 map "/" do
-  use Rack::Rewritten
+  use Rack::Rewritten::Url
   #use Rack::Hitter
-  use Rack::Filter
+  use Rack::Rewritten::Html
   run Rack::Dummy.new
 end
 
