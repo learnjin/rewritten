@@ -143,19 +143,10 @@ module Rewritten
  end
 
   def get_current_translation(path)
-    #to = Rewritten.redis.get("to:#{path}")
-    #if to
-    #  # return current path
-    #  Rewritten.list_range("to:#{to}", -1, 1)  
-    #else
-    #  # return path
-    #  path
-    #end
     translation = Rewritten.list_range("to:#{path}", -1, 1)  
     return translation if translation
     return path
   end
-
 
 
 
