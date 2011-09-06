@@ -139,21 +139,21 @@ module Rewritten
 
 
     get "/?" do
-      redirect url_path(:overview)
+      redirect url_path(:translations)
     end
 
-    get "/overview" do
-      show 'overview'
+    get "/translations" do
+      show 'translations'
     end
 
     get "/new" do 
       show "new"
     end
 
-    post "/mappings" do
+    post "/translations" do
       if params[:from]!='' && params[:to]!=''
         Rewritten.add_translation(params[:from], params[:to])
-        redirect u('overview')
+        redirect u('translations')
       else
         show "new"
       end
@@ -200,7 +200,7 @@ module Rewritten
 
     def self.tabs
       #@tabs ||= ["Overview", "Working", "Failed", "Queues", "Workers", "Stats"]
-      @tabs ||= ["Overview", "Hits"] 
+      @tabs ||= ["Translations", "Hits"] 
     end
  
   end

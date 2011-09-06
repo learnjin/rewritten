@@ -32,15 +32,15 @@
 
   <h1 class='wi'>Translations</h1>
 
-  <p class='intro'>The list below contains all the registered translations from
-  url to target url.  Select a target from above to view all mappings for the
-  target.</p>
+  <p class='intro'>The list below contains all the registered translations from an 
+  url to target url.  To view all translations for a target click on the
+  target URL.</p>
 
-  <a href="<%= u('/new') %>"> + New Mapping </a>
+  <a href="<%= u('/new') %>"> + New Translation </a>
 
   <p class='sub'>Showing <%= (start = params[:start].to_i)+1 %> to <%= start + Rewritten.per_page %> of <b><%=size = Rewritten.size('froms')%></b> translations. </p>
 
-  <table class='queues'>
+  <table class=''>
     <tr>
       <th>from URL (Browser Location)</th>
       <th>to URL (Your App)</th>
@@ -49,7 +49,7 @@
     <% for mapping in Rewritten.list_range("froms", params[:start].to_i, Rewritten.per_page) %>
       <tr>
         <td class=''><a href="<%= mapping %>" target="new"><%= mapping %></td>
-        <td class='queue'><a href="<%= u("/to?to=#{to=Rewritten.redis.get("from:#{mapping}")}") %>"><%= to %></td>
+        <td class=''><a href="<%= u("/to?to=#{to=Rewritten.redis.get("from:#{mapping}")}") %>"><%= to %></td>
         </tr>
       <% end %>
 

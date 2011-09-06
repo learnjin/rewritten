@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Kai Rubarth"]
   s.email       = ["kai@doxter.de"]
   s.homepage    = ""
-  s.summary     = %q{Rack app that rewrites URLs -- nicely and uncomplicated}
+  s.summary     = %q{A redis-based URL rewriting engine}
 
   s.rubyforge_project = "rewritten"
 
@@ -23,16 +23,22 @@ Gem::Specification.new do |s|
   s.add_dependency "multi_json",      "~> 1.0"
 
   s.description = <<description
-    Rewritten is a simple Redis-backed Ruby library that facilitates creating and refactoring 
-    arbitrary urls in your Rack applications.
+    Rewritten is a lookup-based rewriting engine that rewrites requested
+    URLs on the fly. The URL manipulations depend on translations found in
+    a redis database.
 
-    Rewritten is inspired by the awesome Resque and Rack::Rewrite gems. It is
-    compromised of four parts:
+    If a matching translation is found, the result of a request is either a
+    redirection or a modification of path and request parameters. For URLs
+    without translation entries the request is left unmodified.
 
-    * A Ruby library for creating and modifying URLs for resources 
-    * A Rack app that takes care of redirecting old URLS in a SEO friendly matter
-    * A Rack app that rewrites links to their nice counterpart 
-    * A Sinatra app for managing URLs 
+    Rewritten takes larges parts from the Resque codebase (which rocks). The
+    gem is compromised of four parts:
+
+    1. A Ruby library for creating, modifying and querying translations
+    2. A Sinatra app for displaying and managing translations
+    3. A Rack app for rewriting and redirecting request (Rack::Rewritten::Url)
+    4. A Rack app for substituting URLs in HTML pages with their current translation (Rack::Rewritten:Html)
+    5. A Rack app for recording successful request (Rack::Rewritten::Record)
 description
 
 end
