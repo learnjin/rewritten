@@ -37,7 +37,7 @@ Gem::Specification.new do |s|
     1. A Ruby library for creating, modifying and querying translations
     2. A Sinatra app for displaying and managing translations
     3. A Rack app for rewriting and redirecting request (Rack::Rewritten::Url)
-    4. A Rack app for substituting URLs in HTML pages with their current translation (Rack::Rewritten:Html)
+    4. A Rack app for substituting URLs in HTML pages with their current translation (Rack::Rewritten::Html)
     5. A Rack app for recording successful request (Rack::Rewritten::Record)
 description
 
