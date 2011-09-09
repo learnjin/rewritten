@@ -22,7 +22,7 @@ module Rack
           res = line
           links.each do |link|
             t = get_translation(link)
-            res.gsub!(/#{link}/, t) if t
+            res.gsub!(/href="#{link}"/, %q|href="#{t}"|) if t
           end
           new_response << res
         end
