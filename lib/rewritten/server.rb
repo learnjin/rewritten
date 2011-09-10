@@ -178,7 +178,7 @@ module Rewritten
       Rewritten.remove_translation(from, to)
 
       if Rewritten.num_translations(to) > 0
-        redirect u("/to?to=#{to}")
+        redirect u("/to?to=#{escape(to)}")
       else
         redirect u("/")
       end

@@ -49,7 +49,7 @@
     <% for mapping in Rewritten.list_range("froms", params[:start].to_i, Rewritten.per_page) %>
       <tr>
         <td class=''><a href="<%= mapping %>" target="new"><%= mapping %></td>
-        <td class=''><a href="<%= u("/to?to=#{to=Rewritten.redis.get("from:#{mapping}")}") %>"><%= to %></td>
+        <td class=''><a href="<%= u("/to?to=#{escape(to=Rewritten.redis.get("from:#{mapping}"))}") %>"><%= to %></td>
         </tr>
       <% end %>
 

@@ -1,13 +1,14 @@
 
 
-<h1>Create New Mapping</h1>
+<h1>New Translation</h1>
 
 
 <div style="float: left; margin-top: 10px">
-<form method="POST" action="<%= u "/translations" %>">
-  <label>From:</label><br/>  <input type="text" name="from" /> <br />
-  <label>To:</label><br/>   <input type="text" name="to" value="<%= params[:to] %>" /> <br />
+<form method="POST" action="<%= u "/translations" %>" >
+  <label>From (what the user sees) </label><br/>  <input type="text" name="from" size="80"/> <br />
+  <label>To (what your app sees) </label><br/>   <input type="text" name="to" size="80" value="<%= params[:to] %>" /> <br />
   <input type="submit" value="Create" />
+  <a href='<%= u("/translations") %>'>Cancel</a>  
 </form>
 </div>
 
