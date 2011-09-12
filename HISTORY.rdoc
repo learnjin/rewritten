@@ -1,0 +1,12 @@
+
+== 0.1.0
+
+* added filter function in web gui
+* improved pagination
+
+== 0.0.4
+
+* fixed bug with unescaped keys in web gui
+
+
+
