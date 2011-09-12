@@ -1,10 +1,12 @@
 <%if  start - Rewritten.per_page >= 0 || start + Rewritten.per_page < size%>
 <p class='pagination'>
   <% if start - Rewritten.per_page >= 0 %>
-    <a href="<%= current_page %>?start=<%= start - Rewritten.per_page %>" class='less'>&laquo; less</a>
+    <!-- <a href="<%= current_page %>?start=<%= start - Rewritten.per_page %>" class='less'>&laquo; less</a> -->
+    <a href="<%= current_page %>?<%= build_query(params.merge({'start' => (start - Rewritten.per_page).to_s})) %>" class='less'>&laquo; less</a>
   <% end %>
   <% if start + Rewritten.per_page <= size %>
-    <a href="<%= current_page %>?start=<%= start + Rewritten.per_page %>" class='more'>more &raquo;</a>
+    <!-- <a href="<%= current_page %>?start=<%= start + Rewritten.per_page %>" class='more'>more &raquo;</a> -->
+    <a href="<%= current_page %>?<%= build_query(params.merge('start' => start + Rewritten.per_page)) %>" class='more'>more &raquo;</a>
   <% end %>
 </p>
 <%end%>

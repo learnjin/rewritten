@@ -143,6 +143,32 @@ module Rewritten
     end
 
     get "/translations" do
+      @size = 0
+      @start = params[:start].to_i
+
+      if params[:f] && params[:f] != ""
+        @translations = []
+        keys = Rewritten.redis.keys("*#{params[:f]}*")
+        keys.each do |key|
+          prefix, url = key.split(":") 
+          if prefix == "from"
+            to = Rewritten.redis.get("from:#{url}") 
+            @translations << [url, to]
+          elsif prefix == "to"
+            from = Rewritten.get_current_translation(url) 
+            @translations << [from, url]
+          end
+        end
+        @size = @translations.size
+        @translations = @translations[params[:start].to_i..params[:start].to_i+Rewritten.per_page-1]
+
+      else
+        @size = Rewritten.size("froms") 
+        froms = Rewritten.list_range("froms", @start, Rewritten.per_page) 
+        @translations = froms.map{|f| [f, Rewritten.redis.get("from:#{f}")]}
+      end
+
+
       show 'translations'
     end
 
