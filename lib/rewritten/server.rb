@@ -196,7 +196,11 @@ module Rewritten
     post "/translations" do
       if params[:from]!='' && params[:to]!=''
         Rewritten.add_translation(params[:from], params[:to])
-        redirect u('translations')
+        if Rewritten.num_translations(params[:to]) < 2
+          redirect u('translations')
+        else
+          redirect u("/to?to=#{escape(params[:to])}")
+        end
       else
         show "new"
       end

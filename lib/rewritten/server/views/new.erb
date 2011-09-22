@@ -5,7 +5,8 @@
 
 <div style="float: left; margin-top: 10px">
 <form method="POST" action="<%= u "/translations" %>" >
-  <label>From (what the user sees) </label><br/>  <input type="text" name="from" size="80"/> <br />
+  <label>From (what the user sees. Subdomain syntax: SUBDOMAIN:/SOME/PATH) </label><br/>
+  <textarea type="text" name="from" cols="80" rows="5" /></textarea> <br />
   <label>To (what your app sees) </label><br/>   <textarea name="to" cols="80" rows="5"><%= params[:to] %></textarea> <br />
   <input type="submit" value="Create" />
   <a href='<%= u("/translations") %>'>Cancel</a>  

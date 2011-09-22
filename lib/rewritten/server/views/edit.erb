@@ -3,7 +3,7 @@
 
 <div style="float: left; margin-top: 10px">
 <form method="POST" action="<%= u "/edit" %>" >
-  <input type="text" name="old" size="80" value="<%= params[:to]  %>"/> <br />
+  <input type="hidden" name="old" size="80" value="<%= params[:to]  %>"/> <br />
   <label>Renaming</label><br/>   <textarea name="new" cols="80" rows="5"><%= params[:to] %></textarea> <br />
   <input type="submit" value="Rename" />
   <a href='<%= u("/to?to=#{escape(params[:to])}") %>'>Cancel</a>  
