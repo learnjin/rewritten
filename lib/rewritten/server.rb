@@ -176,6 +176,23 @@ module Rewritten
       show "new"
     end
 
+    get "/edit" do
+      show "edit"
+    end
+
+    post "/edit" do
+      old_to = params[:old]
+      new_to = params[:new]
+
+      # for every existing translation
+      Rewritten.redis.lrange("to:#{old_to}",0,-1).each do |from|
+        Rewritten.remove_translation(from, old_to)
+        Rewritten.add_translation(from, new_to)
+      end
+
+      redirect u("/to?to=#{escape(new_to)}")
+    end
+
     post "/translations" do
       if params[:from]!='' && params[:to]!=''
         Rewritten.add_translation(params[:from], params[:to])
