@@ -14,8 +14,13 @@ module Rack
         puts "-> Rack::Rewritten::Url"
         req = Rack::Request.new(env)
 
-        if to = ::Rewritten.redis.get("from:#{req.path_info}")
+        subdomain = env["SUBDOMAIN"] ? "#{env["SUBDOMAIN"]}:" : ""
+
+        puts "SUBDOMAIN: #{subdomain}"
+
+        if to = ::Rewritten.redis.get("from:#{subdomain}#{req.path_info}")
           current_path = ::Rewritten.list_range("to:#{to}", -1, 1)  
+          current_path = current_path.split(":").last
           if current_path == req.path_info
             # if this is the current path, rewrite path and parameters
             tpath, tparams = split_to_path_params(to)
@@ -25,8 +30,15 @@ module Rack
           else
             # if this is not the current path, redirect to current path
             r = Rack::Response.new
-            r.redirect(current_path, 301)
-            r.finish
+            # NOTE: assuming redirection is always to non-subdomain-path
+            new_path = env["rack.url_scheme"]
+            new_path << "://"
+            new_path << env["HTTP_HOST"].sub(/^#{subdomain.chomp(':')}\./, '')
+            new_path << current_path
+            r.redirect(new_path, 301)
+            a = r.finish
+            puts a.inspect
+            a
           end
         else
           @app.call(req.env) 

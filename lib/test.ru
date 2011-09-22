@@ -4,7 +4,8 @@ require 'rewritten'
 require 'rewritten/server'
 
 map "/" do
-  use Rack::Rewritten::Record
+  #use Rack::Rewritten::Record
+  use Rack::Rewritten::Subdomain, "lvh.me"
   use Rack::Rewritten::Url
   use Rack::Rewritten::Html
   run Rack::Dummy.new
