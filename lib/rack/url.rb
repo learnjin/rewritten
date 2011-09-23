@@ -31,10 +31,14 @@ module Rack
             # if this is not the current path, redirect to current path
             r = Rack::Response.new
             # NOTE: assuming redirection is always to non-subdomain-path
-            new_path = env["rack.url_scheme"].clone
-            new_path << "://"
-            new_path << env["HTTP_HOST"].clone.sub(/^#{subdomain.chomp(':')}\./, '')
-            new_path << current_path
+            
+            #new_path = env["rack.url_scheme"].clone
+            #new_path << "://"
+            #new_path << env["HTTP_HOST"].clone.sub(/^#{subdomain.chomp(':')}\./, '')
+            #new_path << current_path
+
+            new_path = 'http://doxter.de/berlin/schmerztherapeut/kai-rubarth'
+
             r.redirect(new_path, 301)
             a = r.finish
             puts a.inspect
