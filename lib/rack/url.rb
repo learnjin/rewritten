@@ -37,7 +37,6 @@ module Rack
             new_path << env["HTTP_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
             new_path << current_path
 
-
             r.redirect(new_path, 301)
             a = r.finish
             puts a.inspect
