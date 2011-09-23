@@ -1,8 +1,8 @@
 == 0.2.0
 
-* support of subdomains
-* support renaming of target in web gui 
-* fix add another translation auto-fill-in bug
+* support for subdomains
+* streamlined CRUD interface in web gui 
+* cleanup page
 
 == 0.1.0
 

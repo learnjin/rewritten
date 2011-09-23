@@ -3,12 +3,13 @@
 
 
 <p>
-<a href="<%= u(%|/edit?to=#{Rack::Utils.escape(params[:to])}|) %>">% edit</a>
+<a href="<%= u(%|/edit?to=#{escape(params[:to])}|) %>">% rename</a>
 </p>
 
 <p>
-<a href="<%= u(%|/new?to=#{Rack::Utils.escape(params[:to])}|) %>"> + add another translation </a>
+<a href="<%= u(%|/delete_all?to=#{escape(params[:to])}|) %>">!! delete all</a>
 </p>
+
 
 <table class='queues'>
   <tr>
@@ -19,7 +20,11 @@
   <% for translation in Rewritten.list_range("to:#{params[:to]}", 0, 100) %>
     <tr>
       <td class=''><a href="<%= translation %>" target="new"><%= translation %></td>
-      <td class=''><a href="<%= u("/delete?from=#{translation}&to=#{escape(params[:to])}") %>">Delete</a></td>
+        <td class=''>
+          <a href="<%= u(%|/edit?to=#{escape(params[:to])}|) %>"> add </a>| 
+          <a href="<%= u(%|/edit?to=#{escape(params[:to])}|) %>"> edit </a>|
+          <a href="<%= u(%|/edit?to=#{escape(params[:to])}|) %>"> remove </a>
+        </td>
     </tr>
   <% end %>
 

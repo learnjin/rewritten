@@ -1,42 +1,42 @@
 
 <%# @subtabs = resque.queues unless partial? || params[:id].nil? %>
 
-  <h1 class='wi'>Translations</h1>
+<h1 class='wi'>Translations</h1>
 
-  <p class='intro'>The list below contains all the registered translations from an 
-  url to target url.  To view all translations for a target click on the
-  target URL.</p>
+<p class='intro'>The list below contains all the registered translations from an 
+url to target url.  To view all translations for a target click on the
+target URL.</p>
 
-  <a href="<%= u('/new') %>"> + New Translation </a>
+<p><a href="<%= u('/new') %>"> + New Translation </a></p>
+<p><a href="<%= u('/cleanup') %>"> % Cleanup </a></p>
 
+<form method="get">
+  <label>Filter:</label> <input type="text" name="f" value="<%= params[:f] %>"/>
+  <a href="<%= u('/translations') %>"> clear </a>
+</form>
 
-  <form method="get">
-    <label>Filter:</label> <input type="text" name="f" value="<%= params[:f] %>"/>
-    <a href="<%= u('/translations') %>"> clear </a>
-  </form>
+<p class='sub'>
+Showing <%= @start + 1%> to <%= [@size, @start + Rewritten.per_page].min %> of <b><%= @size %></b> translations
+<% if params[:f] && params[:f] != '' %>
+  matching: <%= params[:f] %>.
+<% else %>.<% end %>
+</p>
 
-  <p class='sub'>
-  Showing <%= @start + 1%> to <%= [@size, @start + Rewritten.per_page].min %> of <b><%= @size %></b> translations
-  <% if params[:f] && params[:f] != '' %>
-    matching: <%= params[:f] %>.
-  <% else %>.<% end %>
-  </p>
+<table class=''>
+  <tr>
+    <th>from URL (Browser Location)</th>
+    <th>to URL (Your App)</th>
+  </tr>
 
-  <table class=''>
+  <% for from,to in @translations %>
     <tr>
-      <th>from URL (Browser Location)</th>
-      <th>to URL (Your App)</th>
+      <td class=''><a href="<%= from %>" target="new"><%= from %></td>
+      <td class=''><a href="<%= u("/to?to=#{escape(to)}") %>"><%= to %></td>
     </tr>
-
-    <% for from,to in @translations %>
-      <tr>
-        <td class=''><a href="<%= from %>" target="new"><%= from %></td>
-        <td class=''><a href="<%= u("/to?to=#{escape(to)}") %>"><%= to %></td>
-        </tr>
-      <% end %>
+  <% end %>
 
     </table>
 
 
-  <%= partial :next_more, :start => @start, :size => @size %>
+    <%= partial :next_more, :start => @start, :size => @size %>
 

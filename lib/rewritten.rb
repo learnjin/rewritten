@@ -132,6 +132,10 @@ module Rewritten
     redis.rpush("to:#{to}", from) 
   end
 
+  def add_translations(to, froms)
+    froms.each {|from|  add_translation(from, to)}
+  end
+
   def num_translations(to)
     Rewritten.size("to:#{to}")
   end
@@ -143,8 +147,18 @@ module Rewritten
     Rewritten.redis.lrem("tos", 0, to) if num_translations(to) == 0
  end
 
+  def remove_all_translations(to)
+    get_all_translations(to).each do |from|
+      Rewritten.remove_translation(from, to)
+    end
+  end
+
+  def get_all_translations(to)
+    Rewritten.redis.lrange("to:#{to}", 0, -1)
+  end
+
   def get_current_translation(path)
-    translation = Rewritten.list_range("to:#{path}", -1, 1)  
+    translation = Rewritten.list_range("to:#{path}", -1)  
     return translation if translation
     return path
   end

@@ -9,13 +9,14 @@ redirection or a modification of path and request parameters. For URLs
 without translation entries the request is left unmodified.
 
 Rewritten takes larges parts from the Resque codebase (which rocks). The
-gem is compromised of four parts:
+gem is compromised of six parts:
 
 1. A Ruby library for creating, modifying and querying translations
 2. A Sinatra app for displaying and managing translations
-3. A Rack app for rewriting and redirecting request (Rack::Rewritten::Url)
-4. A Rack app for substituting URLs in HTML pages with their current translation (Rack::Rewritten::Html)
-5. A Rack app for recording successful request (Rack::Rewritten::Record)
+3. A Rack app for identifying subdomains (Rack::Rewritten::Subdomain)
+4. A Rack app for rewriting and redirecting request (Rack::Rewritten::Url)
+5. A Rack app for substituting URLs in HTML pages with their current translation (Rack::Rewritten::Html)
+6. A Rack app for recording requests (Rack::Rewritten::Record)
 
 
 == New Relic Notice
@@ -43,9 +44,10 @@ Translations are removed in a similar fashion.
 
 == Usage in your Rack stack
 
-To take full advantage of the engine you would use both, the URL and
-HTML, rack apps as follows:
+To take full advantage of the engine you would be using  at least
+the following stack:
 
+    use Rack::Rewritten::Subdomain, "example.com", "lvh.me" # only needed for subdomain support
     use Rack::Rewritten::Url
     use Rack::Rewritten::Html
     run Your::App

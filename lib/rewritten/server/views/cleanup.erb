@@ -1,0 +1,28 @@
+
+<h1>Cleanup</h1>
+
+<% if @from_without_tos.size > 0 %>
+
+<p>The following translations seem to be broken:</p>
+
+<table class=''>
+  <tr>
+    <th>from URL (Browser Location)</th>
+    <th>to URL (Your App)</th>
+  </tr>
+
+  <% for from in @from_without_tos  %>
+    <tr>
+      <td><%= from %></td> 
+      <td></td>
+      <td><a href='<%= u("/delete?from=#{escape(from)}") %>'>delete</a></td>
+    </tr>
+  <% end %>
+
+</table>
+
+<% else %>
+  <p>No obviously broken translations found.</p>
+<% end %>
+
+

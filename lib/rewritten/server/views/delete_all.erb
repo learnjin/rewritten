@@ -1,0 +1,40 @@
+
+<div style="">
+  <% if @to %>  
+
+    <h1 class='wi'><%= @to %> (App URL)</h1>
+
+    <table class='queues'>
+      <tr>
+        <th>Translations (Browser Location Bar) </th>
+      </tr>
+      <% for translation in Rewritten.get_all_translations(@to) %>
+        <tr>
+          <td class=''><a href="<%= translation %>" target="new"><%= translation %></td>
+          </tr>
+        <% end %>
+      </table>
+
+      <div style="float :left">
+
+        <p>
+        From a SEO perspective it's wise to keep the links and just 
+        <a href='<%= u("/edit?to=#{escape(@to)}") %>'>add another translation</a> resulting in a 301 redirect.
+        </p>
+        <p>
+        Are you sure you want to delete all translations? THIS CANNOT BE UNDONE.
+        </p>
+
+        <form action='<%= u("/delete_all")%>' method="post" style="margin-top: 10px ">  
+          <input type="hidden" name="_method" value="delete">  
+          <input type="hidden" name="from" value="<%= @from %>">
+          <input type="hidden" name="to" value="<%= @to %>">
+          <input type="submit" value="Yes, I know; please do remove everything!">
+          <a href='<%= u("/to?to=#{escape(@to)}") %>'>Cancel</a>  
+        </form>  
+      </div>
+    <% else %>  
+      <p>No translations found.</p>  
+    <% end %>
+  </div>  
+

@@ -78,6 +78,11 @@ module Rewritten
         end
       end
 
+      def extract_translations
+        text = params[:translations] or ""
+        text.split("\n").map(&:strip).reject(&:empty?)
+      end
+
       def show_args(args)
         Array(args).map { |a| a.inspect }.join("\n")
       end
@@ -173,34 +178,42 @@ module Rewritten
     end
 
     get "/new" do 
+      @translations = []
       show "new"
     end
 
     get "/edit" do
+      @old_to = @to = params[:to]
+      @translations = Rewritten.get_all_translations(@to)
       show "edit"
     end
 
     post "/edit" do
-      old_to = params[:old]
-      new_to = params[:new]
 
-      # for every existing translation
-      Rewritten.redis.lrange("to:#{old_to}",0,-1).each do |from|
-        Rewritten.remove_translation(from, old_to)
-        Rewritten.add_translation(from, new_to)
+      @old_to = params[:old].strip
+      @to = params[:to].strip
+      @translations = extract_translations
+
+      if @to != '' and @translations.size > 0
+
+        # delete old translations
+        Rewritten.remove_all_translations(@old_to)
+        # create new translations
+        Rewritten.add_translations(@to, @translations)
+
+        redirect u("/to?to=#{escape(@to)}")
+      else
+        show "edit"
       end
 
-      redirect u("/to?to=#{escape(new_to)}")
     end
 
     post "/translations" do
-      if params[:from]!='' && params[:to]!=''
-        Rewritten.add_translation(params[:from], params[:to])
-        if Rewritten.num_translations(params[:to]) < 2
-          redirect u('translations')
-        else
-          redirect u("/to?to=#{escape(params[:to])}")
-        end
+      @to = params[:to].strip
+      @translations = extract_translations 
+      if @to != '' && @translations.size > 0
+        Rewritten.add_translations(@to, @translations)
+        redirect u('translations')
       else
         show "new"
       end
@@ -211,6 +224,18 @@ module Rewritten
       show "to" 
     end
 
+    get "/cleanup" do
+      # find keys that have no target
+      @from_without_tos= []
+      Rewritten.redis.lrange("froms", 0, -1).each do |from|
+        if Rewritten.redis.get("from:#{from}").empty?
+          @from_without_tos << from
+        end
+      end
+      
+      show "cleanup"
+    end
+
     get "/delete" do
       @from = params[:from]
       @to = params[:to]
@@ -218,18 +243,20 @@ module Rewritten
     end
 
     post '/delete' do
-
       from = params[:from]
       to   = params[:to]
-
       Rewritten.remove_translation(from, to)
+      redirect u("/")
+    end
 
-      if Rewritten.num_translations(to) > 0
-        redirect u("/to?to=#{escape(to)}")
-      else
-        redirect u("/")
-      end
+    get "/delete_all" do
+      @to = params[:to]
+      show "delete_all"
+    end
 
+    post "/delete_all" do
+      Rewritten.remove_all_translations(params[:to])
+      redirect u("/")
     end
 
     get "/hits" do
@@ -246,10 +273,9 @@ module Rewritten
     end
 
     def self.tabs
-      #@tabs ||= ["Overview", "Working", "Failed", "Queues", "Workers", "Stats"]
       @tabs ||= ["Translations", "Hits"] 
     end
- 
+
   end
 end
 
