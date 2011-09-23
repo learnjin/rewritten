@@ -33,7 +33,7 @@ module Rack
             # NOTE: assuming redirection is always to non-subdomain-path
             new_path = env["rack.url_scheme"].clone
             new_path << "://"
-            new_path << env["HTTP_HOST"].sub(/^#{subdomain.chomp(':')}\./, '')
+            new_path << env["HTTP_HOST"].clone.sub(/^#{subdomain.chomp(':')}\./, '')
             new_path << current_path
             r.redirect(new_path, 301)
             a = r.finish
