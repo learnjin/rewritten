@@ -17,9 +17,13 @@ module Rack
 
         @fqdns.each do |n|
           if req.host =~ /(.+)\.#{n}$/
-            env["SUBDOMAIN"] = $1
-            env["FQDN"] = n 
-            break
+            if $1 == 'www'
+              break
+            else
+              env["SUBDOMAIN"] = $1
+              env["FQDN"] = n 
+              break
+            end
           end
         end
 
