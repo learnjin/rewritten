@@ -1,3 +1,6 @@
+== 0.3.0
+
+* support for forwarded request staying on the forwarding host
 
 == 0.2.1
 
