@@ -11,12 +11,9 @@ module Rack
       end
 
       def call(env)
-        puts "-> Rack::Rewritten::Url"
         req = Rack::Request.new(env)
 
         subdomain = env["SUBDOMAIN"] ? "#{env["SUBDOMAIN"]}:" : ""
-
-        puts "SUBDOMAIN: #{subdomain}"
 
         if to = ::Rewritten.redis.get("from:#{subdomain}#{req.path_info}")
           current_path = ::Rewritten.list_range("to:#{to}", -1, 1)  
@@ -34,12 +31,16 @@ module Rack
             
             new_path = env["rack.url_scheme"].dup
             new_path << "://"
-            new_path << env["HTTP_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
+            if env["HTTP_X_FORWARDED_HOST"]
+              new_path << env["HTTP_X_FORWARDED_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
+            else
+              new_path << env["HTTP_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
+            end
             new_path << current_path
 
             r.redirect(new_path, 301)
             a = r.finish
-            puts a.inspect
+            #puts a.inspect
             a
           end
         else
