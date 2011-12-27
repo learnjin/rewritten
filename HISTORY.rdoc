@@ -1,3 +1,9 @@
+
+== 0.3.1
+
+* removed rudimentary proxy support from 0.3.0 because it's better
+  taken care of in your apache config. 
+
 == 0.3.0
 
 * support for forwarded request staying on the forwarding host
