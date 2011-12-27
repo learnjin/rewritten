@@ -31,17 +31,11 @@ module Rack
             
             new_path = env["rack.url_scheme"].dup
             new_path << "://"
-            if env["HTTP_X_FORWARDED_HOST"]
-              new_path << env["HTTP_X_FORWARDED_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
-            else
-              new_path << env["HTTP_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
-            end
+            new_path << env["HTTP_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
             new_path << current_path
 
             r.redirect(new_path, 301)
             a = r.finish
-            #puts a.inspect
-            a
           end
         else
           @app.call(req.env) 
