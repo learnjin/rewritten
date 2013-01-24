@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency "redis-namespace", "~> 1.0.2"
+  s.add_dependency "redis-namespace"
   s.add_dependency "vegas",           "~> 0.1.2"
   s.add_dependency "sinatra",         ">= 0.9.2"
   s.add_dependency "multi_json",      "~> 1.0"
