@@ -1,7 +1,5 @@
-require 'rubygems'
-require 'rack'
-require 'rewritten'
-require 'rewritten/server'
+require_relative 'rewritten'
+require_relative 'rewritten/server'
 
 map "/" do
   #use Rack::Rewritten::Record
