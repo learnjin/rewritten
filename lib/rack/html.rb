@@ -18,7 +18,7 @@ module Rack
         new_response = []
 
         response.each do |line|
-          links = line.scan(/href="([^"]+)"/).uniq
+          links = line.scan(/href="([^"]+)"/).flatten.uniq
           res = line
           links.each do |link|
             t = get_translation(link)
