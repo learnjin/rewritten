@@ -1,3 +1,6 @@
+== 0.3.3
+
+  * Possibly fixing new relic compatiblity: Only process successful responses in Rewritten::HTML
 
 == 0.3.1
 
