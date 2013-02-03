@@ -11,20 +11,22 @@ module Rack
       end
 
       def call(env)
-        puts "-> Rack::Rewritten::Html"
         req = Rack::Request.new(env)
         status, headers, response = @app.call(env)
 
-        new_response = []
-
-        response.each do |line|
-          links = line.scan(/href="([^"]+)"/).flatten.uniq
-          res = line
-          links.each do |link|
-            t = get_translation(link)
-            res.gsub!(/href="#{link}"/, %Q|href="#{t}"|) if t
+        if status == 200
+          new_response = []
+          response.each do |line|
+            links = line.scan(/href="([^"]+)"/).flatten.uniq
+            res = line
+            links.each do |link|
+              t = get_translation(link)
+              res.gsub!(/href="#{link}"/, %Q|href="#{t}"|) if t
+            end
+            new_response << res
           end
-          new_response << res
+        else
+          new_response = response
         end
 
         [status, headers, new_response]
