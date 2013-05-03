@@ -34,6 +34,9 @@ module Rewritten
       @redis = Redis::Namespace.new(namespace, :redis => redis)
     when Redis::Namespace
       @redis = server
+    when :test
+      @redis = :test
+      @static_translations = {}
     else
       @redis = Redis::Namespace.new(:rewritten, :redis => server)
     end
@@ -126,10 +129,14 @@ module Rewritten
   #
 
   def add_translation(from, to)
-    redis.set("from:#{from}", to)
-    redis.lpush(:froms, from) 
-    redis.lpush(:tos, to) 
-    redis.rpush("to:#{to}", from) 
+    if @redis == :test
+      @static_translations[from] = to
+    else
+      redis.set("from:#{from}", to)
+      redis.lpush(:froms, from) 
+      redis.lpush(:tos, to) 
+      redis.rpush("to:#{to}", from) 
+    end
   end
 
   def add_translations(to, froms)
@@ -158,9 +165,21 @@ module Rewritten
   end
 
   def get_current_translation(path)
-    translation = Rewritten.list_range("to:#{path}", -1)  
-    return translation if translation
-    return path
+    if @redis == :test
+
+      translations = @static_translations.select{|k,v| v == path}
+
+      if translations.size > 0
+        return translations.keys.last
+      else
+        return path
+      end
+
+    else
+      translation = Rewritten.list_range("to:#{path}", -1)  
+      return translation if translation
+      return path
+    end
   end
 
 
@@ -174,8 +193,12 @@ module Rewritten
     Rewritten.redis.smembers("hits").map{|e| decode(e)}
   end
 
-  def include?(path)
-    Rewritten.redis.get("from:#{path}")
+  def includes?(path)
+    if @redis == :test
+      @static_translations[path]        
+    else
+      Rewritten.redis.get("from:#{path}")
+    end
   end
 
   #

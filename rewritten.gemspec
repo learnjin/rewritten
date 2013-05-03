@@ -22,6 +22,10 @@ Gem::Specification.new do |s|
   s.add_dependency "sinatra",         ">= 0.9.2"
   s.add_dependency "multi_json",      "~> 1.0"
 
+  s.add_development_dependency "rake"
+  s.add_development_dependency "minitest"
+  s.add_development_dependency "pry"
+
   s.description = <<description
     Rewritten is a lookup-based rewriting engine that rewrites requested
     URLs on the fly. The URL manipulations depend on translations found in

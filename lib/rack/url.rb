@@ -6,8 +6,10 @@ module Rack
 
     class Url
 
-      def initialize(app, options = {})
+      def initialize(app, &block)
         @app = app
+
+        self.instance_eval(&block) if block_given?
       end
 
       def call(env)
@@ -15,9 +17,10 @@ module Rack
 
         subdomain = env["SUBDOMAIN"] ? "#{env["SUBDOMAIN"]}:" : ""
 
-        if to = ::Rewritten.redis.get("from:#{subdomain}#{req.path_info}")
-          current_path = ::Rewritten.list_range("to:#{to}", -1, 1)  
+        if to = ::Rewritten.includes?("#{subdomain}#{req.path_info}")
+          current_path = ::Rewritten.get_current_translation(to)
           current_path = current_path.split(":").last
+
           if current_path == req.path_info
             # if this is the current path, rewrite path and parameters
             tpath, tparams = split_to_path_params(to)
@@ -26,9 +29,10 @@ module Rack
             @app.call(req.env) 
           else
             # if this is not the current path, redirect to current path
-            r = Rack::Response.new
             # NOTE: assuming redirection is always to non-subdomain-path
             
+            r = Rack::Response.new
+
             new_path = env["rack.url_scheme"].dup
             new_path << "://"
             new_path << env["HTTP_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
@@ -47,6 +51,16 @@ module Rack
         [path, Rack::Utils.parse_query(query_string)] 
       end
 
+
+      private
+      
+      def add_translation(from,to)
+        ::Rewritten.redis = :test unless ::Rewritten.redis == :test
+        ::Rewritten.add_translation(from, to)
+      end
+
+
+      
     end
   end
 
