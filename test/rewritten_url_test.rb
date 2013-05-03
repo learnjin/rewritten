@@ -40,6 +40,14 @@ describe Rack::Rewritten::Url do
       ret[1]['Location'].must_equal "http://www.example.org/foo/baz"
     end
 
+    it "must keep the query parameters in the 301 redirect" do
+      ret = @rack.call( call_args.merge('REQUEST_URI' => '/foo/bar', 'PATH_INFO' => '/foo/bar', 'QUERY_STRING' => 'w=1' ))
+      @app.verify
+      ret[0].must_equal 301
+      ret[1]['Location'].must_equal "http://www.example.org/foo/baz?w=1"
+    end
+
+
     it "must stay on latest translation" do
       @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
       ret = @rack.call( call_args.merge('REQUEST_URI' => '/foo/baz', 'PATH_INFO' => '/foo/baz' ))

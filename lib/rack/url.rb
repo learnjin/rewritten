@@ -37,6 +37,7 @@ module Rack
             new_path << "://"
             new_path << env["HTTP_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
             new_path << current_path
+            new_path << '?' << env["QUERY_STRING"] unless (env["QUERY_STRING"]||'').empty?
 
             r.redirect(new_path, 301)
             a = r.finish
