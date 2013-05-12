@@ -6,6 +6,7 @@ require 'rack/url'
 require 'rack/record'
 require 'rack/html'
 require 'rack/subdomain'
+require 'pry'
 
 module Rewritten
   include Helpers
@@ -168,14 +169,17 @@ module Rewritten
     end
   end
 
-  def all_translations
+  def all_tos
     tos = []
     if Rewritten.redis == :test
-      tos = @static_translations.values.uniq.sort
+      tos = @static_translations.values.uniq
     else
-      tos = Rewritten.redis.lrange("tos",0,-1)
+      tos = Rewritten.redis.lrange("tos",0,-1).uniq
     end
-    Hash[tos.map {|to| [to, Rewritten.get_all_translations(to)]}]
+  end
+
+  def all_translations
+    Hash[all_tos.map {|to| [to, Rewritten.get_all_translations(to)]}]
   end
 
   def get_all_translations(to)

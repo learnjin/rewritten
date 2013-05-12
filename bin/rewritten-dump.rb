@@ -4,17 +4,17 @@ $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 
 require 'optparse'
 require 'rewritten'
-require 'multi_json'
 
 options = {
-  :out => 'rewritten.json'
+  :out => 'rewritten.csv',
+  :verbose => false
 }
 
 op = OptionParser.new do |opts|
   opts.banner = "Usage: rewriten-dump.rb [options]"
 
-  opts.on("-v", "--verbose", "be more verbose") do |v|
-    options[:verbose] = v
+  opts.on("-v", "--verbose", "be more verbose") do
+    options[:verbose] = true
   end
 
   opts.on("-o", "--out FILE", 'output file or "-" for stdout') do |o|
@@ -34,6 +34,12 @@ end
 op.parse!
 
 Rewritten.redis = options[:uri] if options[:uri] 
-File.open(options[:out], "w"){|f| f.write(MultiJson.encode(Rewritten.all_translations) + "\n")}
+
+file = options[:out] == "-" ? STDOUT : File.open(options[:out], "w")
+
+file.puts "#from;to"
+Rewritten.all_tos.each do |to|
+  file.puts Rewritten.get_all_translations(to).map{|from| "#{from};#{to}"}.join("\n")
+end
 
 

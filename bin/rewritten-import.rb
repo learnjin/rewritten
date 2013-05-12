@@ -42,9 +42,11 @@ Rewritten.redis = options[:uri] if options[:uri]
 
 Rewritten.clear_translations if options[:drop]
 
-File.open(options[:file]) do |f|
-  h = MultiJson.decode(f.read)
-  h.each{|k,v| Rewritten.add_translations(k,v) }
+File.open(options[:file]).each do |line|
+  next if line =~ /^#/
+  from,to = line.split(";")
+  puts "adding #{from} -> #{to}" if options[:verbose]
+  Rewritten.add_translation(from,to)
 end
 
 
