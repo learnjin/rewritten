@@ -160,8 +160,30 @@ module Rewritten
     end
   end
 
+  def clear_translations
+    if Rewritten.redis == :test
+      @static_translations = {}    
+    else
+      Rewritten.redis.del(*Rewritten.redis.keys) unless Rewritten.redis.keys.empty?
+    end
+  end
+
+  def all_translations
+    tos = []
+    if Rewritten.redis == :test
+      tos = @static_translations.values.uniq.sort
+    else
+      tos = Rewritten.redis.lrange("tos",0,-1)
+    end
+    Hash[tos.map {|to| [to, Rewritten.get_all_translations(to)]}]
+  end
+
   def get_all_translations(to)
-    Rewritten.redis.lrange("to:#{to}", 0, -1)
+    if Rewritten.redis == :test
+      @static_translations.to_a.select{|k,v| v == to}.map{|k,v| k} 
+    else
+      Rewritten.redis.lrange("to:#{to}", 0, -1)
+    end
   end
 
   def get_current_translation(path)
