@@ -1,3 +1,7 @@
+== 0.7.0
+
+  * use sorted sets for the targets instead of lists
+
 == 0.6.0 
 
   * backwards translations (from resource to current translation)
