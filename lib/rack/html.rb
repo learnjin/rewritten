@@ -20,7 +20,7 @@ module Rack
             links = line.scan(/href="([^"]+)"/).flatten.uniq
             res = line
             links.each do |link|
-              t = get_translation(link)
+              t = ::Rewritten.get_current_translation(link)
               res.gsub!(/href="#{link}"/, %Q|href="#{t}"|) if t
             end
             new_response << res
@@ -30,12 +30,6 @@ module Rack
         end
 
         [status, headers, new_response]
-      end
-
-      private
-
-      def get_translation(url)
-        ::Rewritten.get_current_translation("to:#{url}")
       end
 
     end
