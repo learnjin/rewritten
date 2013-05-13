@@ -11,7 +11,7 @@ target URL.</p>
 <p><a href="<%= u('/cleanup') %>"> % Cleanup </a></p>
 
 <form method="get">
-  <label>Filter:</label> <input type="text" name="f" value="<%= params[:f] %>"/>
+  <label>Filter (use <b>* ? []</b> as glob-style patterns):</label> <input type="text" name="f" value="<%= params[:f] %>"/>
   <a href="<%= u('/translations') %>"> clear </a>
 </form>
 

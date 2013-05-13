@@ -151,14 +151,18 @@ module Rewritten
       @size = 0
       @start = params[:start].to_i
 
-      if params[:f] && params[:f] != ""
+      filter = params[:f]
+
+      if filter && filter != ""
         @translations = []
 
-        keys = Rewritten.redis.keys("*#{params[:f]}*")
+        keys = Rewritten.redis.keys("from:#{filter}") +
+               Rewritten.redis.keys("to:#{filter}") 
+
         keys.each do |key|
           prefix, url = key.split(":") 
           if prefix == "from"
-            to = Rewritten.redis.get("from:#{url}") 
+            to = Rewritten.translate(url)
             @translations << [url, to]
           elsif prefix == "to"
             from = Rewritten.get_current_translation(url) 
