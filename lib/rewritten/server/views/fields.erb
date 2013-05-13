@@ -5,12 +5,20 @@
   <h2>Translations (What's seen in the browser's location bar)</h2>
   <p>Last line being the final location in the browser</p>
   <p>Subdomains are to be prefixed with a colon, e.g. my.subdomain:/some/path</p>
+
+  <h3>Flags </h3>
+  <p> Flags can modify above behavior. They are appended at the end of a line like so: /foo/bar [L] </p>
+  <dl>
+    <dt>H</dt>
+    <dd>Stop translating. Keep this line in the browser, don't go to last line.</dd>
+  </dl>
+
 </label><br/>
 
 <textarea name="translations" cols="80" rows="10"><%= @translations.join("\n") %></textarea> <br />
 
 <p>
-<label><h2>Resource (What your app sees)</h2></label><br/>
+<label><h2>Resource (What your app sees)</h2></label><br/>
 <textarea name="to" cols="80" rows="2"><%= @to %></textarea>
 </p>
 

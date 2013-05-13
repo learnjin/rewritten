@@ -21,6 +21,24 @@ body { padding:0; margin:0; }
 #main span.hl { background:#efefef; padding:2px;}
 #main h1 { margin:10px 0; font-size:190%; font-weight:bold; color:#ce1212;}
 #main h2 { margin:10px 0; font-size:130%;}
+#main h3 { margin:10px 0; font-size:120%;}
+
+#main dl{ }
+#main dl dt {
+  float: left;
+  font-weight: bold;
+  margin-right: 10px;
+  padding:5px;
+  width: 15px;
+
+}
+
+#main dl dd{
+  margin: 2px 0;
+  padding: 5px 0;
+}
+
+
 #main table { width:100%; margin:10px 0;}
 #main table tr td, #main table tr th { border:1px solid #ccc; padding:6px;}
 #main table tr th { background:#efefef; color:#888; font-size:80%; font-weight:bold;}
