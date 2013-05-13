@@ -1,3 +1,7 @@
+== 0.6.0 
+
+  * backwards translations (from resource to current translation)
+
 == 0.5.0
 
   * dump and import scripts in bin/
