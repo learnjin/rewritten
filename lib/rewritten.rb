@@ -130,7 +130,10 @@ module Rewritten
     redis.set("from:#{from}", to)
     redis.sadd(:froms, from) 
     redis.sadd(:tos, to) 
-    redis.rpush("to:#{to}", from) 
+
+
+    score = redis.zcard("to:#{to}") || 0
+    redis.zadd("to:#{to}", score, from)  
   end
 
   def add_translations(to, froms)
@@ -138,13 +141,13 @@ module Rewritten
   end
 
   def num_translations(to)
-    Rewritten.redis.llen("to:#{to}")
+    Rewritten.redis.zcard("to:#{to}")
   end
 
   def remove_translation(from, to)
     Rewritten.redis.del("from:#{from}")
     Rewritten.redis.srem(:froms, from)
-    Rewritten.redis.lrem("to:#{to}", 0, from)
+    Rewritten.redis.zrem("to:#{to}", from)
     Rewritten.redis.srem(:tos, to) if num_translations(to) == 0
  end
 
@@ -176,11 +179,11 @@ module Rewritten
   end
 
   def get_all_translations(to)
-    Rewritten.redis.lrange("to:#{to}", 0, -1)
+    Rewritten.redis.zrange("to:#{to}", 0, -1)
   end
 
   def get_current_translation(path)
-    translation = Rewritten.list_range("to:#{path}", -1)  
+    translation = Rewritten.z_range("to:#{path}", -1)
     return translation if translation
     return path
   end
@@ -209,13 +212,11 @@ module Rewritten
 
   # Does the dirty work of fetching a range of items from a Redis list
   # and converting them into Ruby objects.
-  def list_range(key, start = 0, count = 1)
+  def z_range(key, start = 0, count = 1)
     if count == 1
-      #decode redis.lindex(key, start)
-      redis.lindex(key, start)
+      redis.zrange(key, start, start)[0]
     else
-      Array(redis.lrange(key, start, start+count-1)).map do |item|
-        #decode item
+      Array(redis.zrange(key, start, start+count-1)).map do |item|
         item
       end
     end

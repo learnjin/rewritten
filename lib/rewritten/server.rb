@@ -201,6 +201,7 @@ module Rewritten
         # delete old translations
         Rewritten.remove_all_translations(@old_to)
         # create new translations
+        
         Rewritten.add_translations(@to, @translations)
 
         redirect u("/to?to=#{escape(@to)}")
@@ -222,7 +223,8 @@ module Rewritten
     end
 
     get "/to" do
-      translations = Rewritten.list_range(params[:to], 0, -1) 
+      #translations = Rewritten.list_range(params[:to], 0, -1) 
+      translations = Rewritten.z_range(params[:to], 0, -1) 
       show "to" 
     end
 

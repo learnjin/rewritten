@@ -17,7 +17,7 @@
     <th>Action</th>
   </tr>
 
-  <% for translation in Rewritten.list_range("to:#{params[:to]}", 0, 100) %>
+  <% for translation in Rewritten.z_range("to:#{params[:to]}", 0, 100) %>
     <tr>
       <td class=''><a href="<%= translation %>" target="new"><%= translation %></td>
         <td class=''>
