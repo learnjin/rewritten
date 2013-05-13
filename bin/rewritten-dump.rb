@@ -39,7 +39,7 @@ file = options[:out] == "-" ? STDOUT : File.open(options[:out], "w")
 
 file.puts "#from;to"
 Rewritten.all_tos.each do |to|
-  file.puts Rewritten.get_all_translations(to).map{|from| "#{from};#{to}"}.join("\n")
+  file.puts Rewritten.get_all_translations(to).map{|from| "#{Rewritten.full_line(from)};#{to}"}.join("\n")
 end
 
 

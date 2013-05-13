@@ -46,7 +46,7 @@ File.open(options[:file]).each do |line|
   next if line =~ /^#/
   from,to = line.split(";")
   puts "adding #{from} -> #{to}" if options[:verbose]
-  Rewritten.add_translation(from,to)
+  Rewritten.add_translation(from,to.chomp)
 end
 
 
