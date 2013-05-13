@@ -1,7 +1,4 @@
-require 'rewritten'
-require 'rack/mock'
-require 'minitest/autorun'
-require 'pry'
+require 'test_helper'
 
 describe Rack::Rewritten::Url do
 
@@ -15,16 +12,21 @@ describe Rack::Rewritten::Url do
       'rack.url_scheme' => 'http'}.merge(overrides)
   end
 
+  before {
+    Rewritten.add_translation '/foo/bar', '/products/1'
+    Rewritten.add_translation '/foo/baz', '/products/1'
+    Rewritten.add_translation '/foo/with/params', '/products/2?w=1'
+  }
+
   describe "redirection behavior" do
 
     before {
       @app = MiniTest::Mock.new
+      @rack = Rack::Rewritten::Url.new(@app)
 
-      @rack = Rack::Rewritten::Url.new(@app) do
-        add_translation '/foo/bar', '/products/1'
-        add_translation '/foo/baz', '/products/1'
-        add_translation '/foo/with/params', '/products/2?w=1'
-      end
+      Rewritten.add_translation '/foo/bar', '/products/1'
+      Rewritten.add_translation '/foo/baz', '/products/1'
+      Rewritten.add_translation '/foo/with/params', '/products/2?w=1'
     }
 
     it "must not redirect if there are no entries" do
@@ -56,7 +58,6 @@ describe Rack::Rewritten::Url do
     end
 
   end
-
 
   describe "the env" do
 

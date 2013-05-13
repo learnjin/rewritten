@@ -35,9 +35,6 @@ module Rewritten
       @redis = Redis::Namespace.new(namespace, :redis => redis)
     when Redis::Namespace
       @redis = server
-    when :test
-      @redis = :test
-      @static_translations = {}
     else
       @redis = Redis::Namespace.new(:rewritten, :redis => server)
     end
@@ -130,14 +127,10 @@ module Rewritten
   #
 
   def add_translation(from, to)
-    if @redis == :test
-      @static_translations[from] = to
-    else
-      redis.set("from:#{from}", to)
-      redis.lpush(:froms, from) 
-      redis.lpush(:tos, to) 
-      redis.rpush("to:#{to}", from) 
-    end
+    redis.set("from:#{from}", to)
+    redis.sadd(:froms, from) 
+    redis.sadd(:tos, to) 
+    redis.rpush("to:#{to}", from) 
   end
 
   def add_translations(to, froms)
@@ -145,14 +138,14 @@ module Rewritten
   end
 
   def num_translations(to)
-    Rewritten.size("to:#{to}")
+    Rewritten.redis.llen("to:#{to}")
   end
 
   def remove_translation(from, to)
     Rewritten.redis.del("from:#{from}")
-    Rewritten.redis.lrem("froms", 0, from)
+    Rewritten.redis.srem(:froms, from)
     Rewritten.redis.lrem("to:#{to}", 0, from)
-    Rewritten.redis.lrem("tos", 0, to) if num_translations(to) == 0
+    Rewritten.redis.srem(:tos, to) if num_translations(to) == 0
  end
 
   def remove_all_translations(to)
@@ -162,20 +155,20 @@ module Rewritten
   end
 
   def clear_translations
-    if Rewritten.redis == :test
-      @static_translations = {}    
-    else
-      Rewritten.redis.del(*Rewritten.redis.keys) unless Rewritten.redis.keys.empty?
-    end
+    Rewritten.redis.del(*Rewritten.redis.keys) unless Rewritten.redis.keys.empty?
+  end
+
+  # Returns an array of all known source URLs (that are to translated)
+  def froms
+    Array(redis.smembers(:froms))
+  end
+
+  def all_froms
+    Array(redis.smembers(:froms))
   end
 
   def all_tos
-    tos = []
-    if Rewritten.redis == :test
-      tos = @static_translations.values.uniq
-    else
-      tos = Rewritten.redis.lrange("tos",0,-1).uniq
-    end
+    Array(Rewritten.redis.smembers(:tos))
   end
 
   def all_translations
@@ -183,29 +176,13 @@ module Rewritten
   end
 
   def get_all_translations(to)
-    if Rewritten.redis == :test
-      @static_translations.to_a.select{|k,v| v == to}.map{|k,v| k} 
-    else
-      Rewritten.redis.lrange("to:#{to}", 0, -1)
-    end
+    Rewritten.redis.lrange("to:#{to}", 0, -1)
   end
 
   def get_current_translation(path)
-    if @redis == :test
-
-      translations = @static_translations.select{|k,v| v == path}
-
-      if translations.size > 0
-        return translations.keys.last
-      else
-        return path
-      end
-
-    else
-      translation = Rewritten.list_range("to:#{path}", -1)  
-      return translation if translation
-      return path
-    end
+    translation = Rewritten.list_range("to:#{path}", -1)  
+    return translation if translation
+    return path
   end
 
 
@@ -220,61 +197,12 @@ module Rewritten
   end
 
   def includes?(path)
-    if @redis == :test
-      @static_translations[path]        
-    else
-      Rewritten.redis.get("from:#{path}")
-    end
+    Rewritten.redis.get("from:#{path}")
   end
 
-  #
-  # queue manipulation
-  #
-
-  # Pushes a job onto a queue. Queue name should be a string and the
-  # item should be any JSON-able Ruby object.
-  #
-  # Resque works generally expect the `item` to be a hash with the following
-  # keys:
-  #
-  #   class - The String name of the job to run.
-  #    args - An Array of arguments to pass the job. Usually passed
-  #           via `class.to_class.perform(*args)`.
-  #
-  # Example
-  #
-  #   Resque.push('archive', :class => 'Archive', :args => [ 35, 'tar' ])
-  #
-  # Returns nothing
-  def push(queue, item)
-    watch_queue(queue)
-    redis.rpush "queue:#{queue}", encode(item)
-  end
-
-  # Pops a job off a queue. Queue name should be a string.
-  #
-  # Returns a Ruby object.
-  def pop(queue)
-    decode redis.lpop("queue:#{queue}")
-  end
-
-  # Returns an integer representing the size of translations for a target. 
-  # Target name should be a string.
-  def size(target)
-    #redis.llen("target:#{target}").to_i
-    redis.llen(target).to_i
-  end
-
-  # Returns an array of items currently queued. Queue name should be
-  # a string.
-  #
-  # start and count should be integer and can be used for pagination.
-  # start is the item to begin, count is how many items to return.
-  #
-  # To get the 3rd page of a 30 item, paginatied list one would use:
-  #   Resque.peek('my_list', 59, 30)
-  def peek(queue, start = 0, count = 1)
-    list_range("queue:#{queue}", start, count)
+  # return the number of froms
+  def num_froms
+    redis.scard(:froms).to_i
   end
 
   # Does the dirty work of fetching a range of items from a Redis list
@@ -301,13 +229,6 @@ module Rewritten
     Array(redis.smembers(:targets))
   end
 
-  # Returns an array of all known source URLs (that are to translated)
-  def froms
-    Array(redis.smembers(:froms))
-  end
-
-
-
   # Given a queue name, completely deletes the queue.
   def remove_queue(queue)
     redis.srem(:queues, queue.to_s)
@@ -320,118 +241,7 @@ module Rewritten
     redis.sadd(:queues, queue.to_s)
   end
 
-
-  #
-  # job shortcuts
-  #
-
-  # This method can be used to conveniently add a job to a queue.
-  # It assumes the class you're passing it is a real Ruby class (not
-  # a string or reference) which either:
-  #
-  #   a) has a @queue ivar set
-  #   b) responds to `queue`
-  #
-  # If either of those conditions are met, it will use the value obtained
-  # from performing one of the above operations to determine the queue.
-  #
-  # If no queue can be inferred this method will raise a `Resque::NoQueueError`
-  #
-  # This method is considered part of the `stable` API.
-  def enqueue(klass, *args)
-    Job.create(queue_from_class(klass), klass, *args)
-
-    Plugin.after_enqueue_hooks(klass).each do |hook|
-      klass.send(hook, *args)
-    end
-  end
-
-  # This method can be used to conveniently remove a job from a queue.
-  # It assumes the class you're passing it is a real Ruby class (not
-  # a string or reference) which either:
-  #
-  #   a) has a @queue ivar set
-  #   b) responds to `queue`
-  #
-  # If either of those conditions are met, it will use the value obtained
-  # from performing one of the above operations to determine the queue.
-  #
-  # If no queue can be inferred this method will raise a `Resque::NoQueueError`
-  #
-  # If no args are given, this method will dequeue *all* jobs matching
-  # the provided class. See `Resque::Job.destroy` for more
-  # information.
-  #
-  # Returns the number of jobs destroyed.
-  #
-  # Example:
-  #
-  #   # Removes all jobs of class `UpdateNetworkGraph`
-  #   Resque.dequeue(GitHub::Jobs::UpdateNetworkGraph)
-  #
-  #   # Removes all jobs of class `UpdateNetworkGraph` with matching args.
-  #   Resque.dequeue(GitHub::Jobs::UpdateNetworkGraph, 'repo:135325')
-  #
-  # This method is considered part of the `stable` API.
-  def dequeue(klass, *args)
-    Job.destroy(queue_from_class(klass), klass, *args)
-  end
-
-  # Given a class, try to extrapolate an appropriate queue based on a
-  # class instance variable or `queue` method.
-  def queue_from_class(klass)
-    klass.instance_variable_get(:@queue) ||
-      (klass.respond_to?(:queue) and klass.queue)
-  end
-
-  # This method will return a `Resque::Job` object or a non-true value
-  # depending on whether a job can be obtained. You should pass it the
-  # precise name of a queue: case matters.
-  #
-  # This method is considered part of the `stable` API.
-  def reserve(queue)
-    Job.reserve(queue)
-  end
-
-  # Validates if the given klass could be a valid Resque job
-  #
-  # If no queue can be inferred this method will raise a `Resque::NoQueueError`
-  #
-  # If given klass is nil this method will raise a `Resque::NoClassError`
-  def validate(klass, queue = nil)
-    queue ||= queue_from_class(klass)
-
-    if !queue
-      raise NoQueueError.new("Jobs must be placed onto a queue.")
-    end
-
-    if klass.to_s.empty?
-      raise NoClassError.new("Jobs must be given a class.")
-    end
-  end
-
-
-  #
-  # worker shortcuts
-  #
-
-  # A shortcut to Worker.all
-  def workers
-    Worker.all
-  end
-
-  # A shortcut to Worker.working
-  def working
-    Worker.working
-  end
-
-  # A shortcut to unregister_worker
-  # useful for command line tool
-  def remove_worker(worker_id)
-    worker = Resque::Worker.find(worker_id)
-    worker.unregister_worker
-  end
-
+  
   #
   # stats
   #

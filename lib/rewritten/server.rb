@@ -153,6 +153,7 @@ module Rewritten
 
       if params[:f] && params[:f] != ""
         @translations = []
+
         keys = Rewritten.redis.keys("*#{params[:f]}*")
         keys.each do |key|
           prefix, url = key.split(":") 
@@ -164,12 +165,13 @@ module Rewritten
             @translations << [from, url]
           end
         end
+
         @size = @translations.size
         @translations = @translations[params[:start].to_i..params[:start].to_i+Rewritten.per_page-1]
 
       else
-        @size = Rewritten.size("froms") 
-        froms = Rewritten.list_range("froms", @start, Rewritten.per_page) 
+        @size = Rewritten.num_froms
+        froms = Rewritten.all_froms[@start, @start+Rewritten.per_page-1]
         @translations = froms.map{|f| [f, Rewritten.redis.get("from:#{f}")]}
       end
 
@@ -227,7 +229,7 @@ module Rewritten
     get "/cleanup" do
       # find keys that have no target
       @from_without_tos= []
-      Rewritten.redis.lrange("froms", 0, -1).each do |from|
+      Rewritten.all_froms.each do |from|
         if Rewritten.redis.get("from:#{from}").empty?
           @from_without_tos << from
         end

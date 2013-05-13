@@ -1,18 +1,15 @@
-require 'rewritten'
-require 'minitest/autorun'
+require 'test_helper'
 
 describe Rewritten do
 
   before{
-    Rewritten.redis = :test
-    Rewritten.clear_translations
     Rewritten.add_translation('/from', '/to')
     Rewritten.add_translation('/from2', '/to')
     Rewritten.add_translation('/from3', '/to2')
   }
 
   it "must give all tos" do
-    Rewritten.all_tos.must_equal ["/to", "/to2"] 
+    Rewritten.all_tos.sort.must_equal ["/to", "/to2"] 
   end
 
   it "must return all translations" do
