@@ -1,3 +1,7 @@
+== 0.8.0
+
+  * introduce the [H] flag to stop translating
+
 == 0.7.0
 
   * use sorted sets for the targets instead of lists
