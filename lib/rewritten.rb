@@ -185,7 +185,9 @@ module Rewritten
     return path
   end
 
-
+  def exist_translation_for?(path)
+    get_current_translation(path) != path
+  end
 
   def add_hit(path, code, content_type)
     h = {:path => path, :code => code, :content_type => content_type}

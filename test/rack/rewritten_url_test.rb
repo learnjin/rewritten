@@ -35,7 +35,7 @@ describe Rack::Rewritten::Url do
       @app.verify
     end
 
-    it "must 301 redirect to latest translation" do
+    it "must 301 redirect from old translation to latest translation" do
       ret = @rack.call( call_args.merge('REQUEST_URI' => '/foo/bar', 'PATH_INFO' => '/foo/bar' ))
       @app.verify
       ret[0].must_equal 301
@@ -49,7 +49,6 @@ describe Rack::Rewritten::Url do
       ret[1]['Location'].must_equal "http://www.example.org/foo/baz?w=1"
     end
 
-
     it "must stay on latest translation" do
       @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
       ret = @rack.call( call_args.merge('REQUEST_URI' => '/foo/baz', 'PATH_INFO' => '/foo/baz' ))
@@ -57,7 +56,32 @@ describe Rack::Rewritten::Url do
       ret[0].must_equal 200
     end
 
+    describe "enforce nice urls" do
+
+      it "must not redirect from resource url to nice url by default" do
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        ret = @rack.call( call_args.merge('REQUEST_URI' => '/products/1', 'PATH_INFO' => '/products/1' ))
+        @app.verify
+        ret[0].must_equal 200
+      end
+
+      it "must redirect from resource url to nice url if enabled xxx" do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.translate_backwards = true
+        end
+
+        ret = @rack.call( call_args.merge('REQUEST_URI' => '/products/1', 'PATH_INFO' => '/products/1' ))
+        @app.verify
+        ret[0].must_equal 301
+        ret[1]['Location'].must_equal "http://www.example.org/foo/baz"
+      end
+
+    end
+
+
   end
+
+
 
   describe "the env" do
 

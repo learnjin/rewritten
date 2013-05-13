@@ -8,8 +8,9 @@ module Rack
 
       def initialize(app, &block)
         @app = app
+        @translate_backwards = false
 
-        self.instance_eval(&block) if block_given?
+        instance_eval(&block) if block_given?
       end
 
       def call(env)
@@ -17,7 +18,12 @@ module Rack
 
         subdomain = env["SUBDOMAIN"] ? "#{env["SUBDOMAIN"]}:" : ""
 
-        if to = ::Rewritten.includes?("#{subdomain}#{req.path_info}")
+        path = "#{subdomain}#{req.path_info}"
+
+        if ::Rewritten.includes?(path) or translate_backwards? && ::Rewritten.exist_translation_for?(path) 
+
+          to = ::Rewritten.includes?(path) || path
+
           current_path = ::Rewritten.get_current_translation(to)
           current_path = current_path.split(":").last
 
@@ -42,7 +48,7 @@ module Rack
             r.redirect(new_path, 301)
             a = r.finish
           end
-        else
+       else
           @app.call(req.env) 
         end
       end
@@ -54,10 +60,13 @@ module Rack
 
 
       private
+
+      def translate_backwards?
+        @translate_backwards  
+      end
       
-      def add_translation(from,to)
-        ::Rewritten.redis = :test unless ::Rewritten.redis == :test
-        ::Rewritten.add_translation(from, to)
+      def translate_backwards=(yes_or_no)
+        @translate_backwards = yes_or_no
       end
 
 
