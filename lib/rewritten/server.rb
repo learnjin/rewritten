@@ -223,7 +223,6 @@ module Rewritten
     end
 
     get "/to" do
-      #translations = Rewritten.list_range(params[:to], 0, -1) 
       translations = Rewritten.z_range(params[:to], 0, -1) 
       show "to" 
     end

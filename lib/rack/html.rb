@@ -35,7 +35,7 @@ module Rack
       private
 
       def get_translation(url)
-        ::Rewritten.list_range("to:#{url}", -1, 1)
+        ::Rewritten.get_current_translation("to:#{url}")
       end
 
     end
