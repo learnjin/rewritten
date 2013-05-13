@@ -11,6 +11,10 @@ describe Rack::Rewritten::Url do
       'rack.input' => '',
       'rack.url_scheme' => 'http'}.merge(overrides)
   end
+  
+  def request_url(url)
+    call_args.merge('REQUEST_URI' => url, 'PATH_INFO' => url )
+  end
 
   before {
     Rewritten.add_translation '/foo/bar', '/products/1'
@@ -74,6 +78,37 @@ describe Rack::Rewritten::Url do
         @app.verify
         ret[0].must_equal 301
         ret[1]['Location'].must_equal "http://www.example.org/foo/baz"
+      end
+
+    end
+
+    describe "flag behavior" do
+
+      before {
+        Rewritten.add_translation('/with/flags [L]', '/adwords/target')
+        Rewritten.add_translation('/with/flags2 [L]', '/adwords/target')
+        Rewritten.add_translation('/no/flags', '/adwords/target')
+        Rewritten.add_translation('/final/line', '/adwords/target')
+      }
+
+      it "must stay on [L] flagged froms" do
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+
+        ret = @rack.call( request_url('/with/flags'))
+        ret[0].must_equal 200
+
+        ret = @rack.call( request_url('/with/flags2'))
+        ret[0].must_equal 200
+
+        @app.verify
+      end
+
+      it "must redirect for other entries" do
+        ret = @rack.call( request_url('/no/flags') )
+        @app.verify
+        ret[0].must_equal 301
+        ret[1]['Location'].must_equal "http://www.example.org/final/line"
       end
 
     end

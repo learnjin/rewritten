@@ -17,9 +17,9 @@
     <th>Action</th>
   </tr>
 
-  <% for translation in Rewritten.z_range("to:#{params[:to]}", 0, 100) %>
+  <% for translation in @translations %>
     <tr>
-      <td class=''><a href="<%= translation %>" target="new"><%= translation %></td>
+      <td class=''><a href="<%= translation %>" target="new"><%= Rewritten.full_line(translation) %></td>
         <td class=''>
           <a href="<%= u(%|/edit?to=#{escape(params[:to])}|) %>"> add </a>| 
           <a href="<%= u(%|/edit?to=#{escape(params[:to])}|) %>"> edit </a>|

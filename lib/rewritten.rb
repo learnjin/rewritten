@@ -126,8 +126,14 @@ module Rewritten
   # translations 
   #
 
-  def add_translation(from, to)
+  def add_translation(line, to)
+    from, flags = line.split(/\s+/)
+
+    flags = flags.scan(/\[(\w+)\]/).first if flags
+
     redis.hset("from:#{from}", :to, to)
+    redis.hset("from:#{from}", :flags, flags) if flags
+
     redis.sadd(:froms, from) 
     redis.sadd(:tos, to) 
     score = redis.zcard("to:#{to}") || 0
@@ -143,7 +149,7 @@ module Rewritten
   end
 
   def remove_translation(from, to)
-    Rewritten.redis.hdel("from:#{from}")
+    Rewritten.redis.del("from:#{from}")
     Rewritten.redis.srem(:froms, from)
     Rewritten.redis.zrem("to:#{to}", from)
     Rewritten.redis.srem(:tos, to) if num_translations(to) == 0
@@ -172,8 +178,8 @@ module Rewritten
     Array(Rewritten.redis.smembers(:tos))
   end
 
-  def all_translations
-    Hash[all_tos.map {|to| [to, Rewritten.get_all_translations(to)]}]
+  def translate(from)
+    redis.hget("from:#{from}", :to)
   end
 
   def get_all_translations(to)
@@ -184,6 +190,26 @@ module Rewritten
     translation = Rewritten.z_range("to:#{path}", -1)
     return translation if translation
     return path
+  end
+
+  def get_flag_string(from)
+    Rewritten.redis.hget("from:#{from}", :flags)||""
+  end
+
+  def has_flag?(from, c)
+    return false unless Rewritten.redis.exists("from:#{from}")
+    get_flag_string(from).index(c) != nil
+  end
+
+  def full_line(from)
+    flags = get_flag_string(from)
+
+    if flags == ""
+      from
+    else
+      "#{from} [#{flags}]" 
+    end
+
   end
 
   def exist_translation_for?(path)

@@ -172,7 +172,7 @@ module Rewritten
       else
         @size = Rewritten.num_froms
         froms = Rewritten.all_froms[@start, @start+Rewritten.per_page-1]
-        @translations = froms.map{|f| [f, Rewritten.redis.get("from:#{f}")]}
+        @translations = froms.map{|f| [f, Rewritten.translate(f)]}
       end
 
 
@@ -186,7 +186,7 @@ module Rewritten
 
     get "/edit" do
       @old_to = @to = params[:to]
-      @translations = Rewritten.get_all_translations(@to)
+      @translations = Rewritten.get_all_translations(@to).map{|t| Rewritten.full_line(t)}
       show "edit"
     end
 
@@ -223,7 +223,7 @@ module Rewritten
     end
 
     get "/to" do
-      translations = Rewritten.z_range(params[:to], 0, -1) 
+      @translations = Rewritten.get_all_translations(params[:to])
       show "to" 
     end
 
