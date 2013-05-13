@@ -127,11 +127,9 @@ module Rewritten
   #
 
   def add_translation(from, to)
-    redis.set("from:#{from}", to)
+    redis.hset("from:#{from}", :to, to)
     redis.sadd(:froms, from) 
     redis.sadd(:tos, to) 
-
-
     score = redis.zcard("to:#{to}") || 0
     redis.zadd("to:#{to}", score, from)  
   end
@@ -145,7 +143,7 @@ module Rewritten
   end
 
   def remove_translation(from, to)
-    Rewritten.redis.del("from:#{from}")
+    Rewritten.redis.hdel("from:#{from}")
     Rewritten.redis.srem(:froms, from)
     Rewritten.redis.zrem("to:#{to}", from)
     Rewritten.redis.srem(:tos, to) if num_translations(to) == 0
@@ -202,7 +200,7 @@ module Rewritten
   end
 
   def includes?(path)
-    Rewritten.redis.get("from:#{path}")
+    Rewritten.redis.hget("from:#{path}", :to)
   end
 
   # return the number of froms
