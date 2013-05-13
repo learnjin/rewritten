@@ -9,4 +9,8 @@ class Minitest::Spec
     Rewritten.clear_translations
   end
 
+  after :each do
+    Rewritten.clear_translations
+  end
+
 end
