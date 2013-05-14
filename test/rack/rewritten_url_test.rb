@@ -12,8 +12,8 @@ describe Rack::Rewritten::Url do
       'rack.url_scheme' => 'http'}.merge(overrides)
   end
   
-  def request_url(url)
-    call_args.merge('REQUEST_URI' => url, 'PATH_INFO' => url )
+  def request_url(url, params={})
+    call_args.merge({'REQUEST_URI' => url, 'PATH_INFO' => url}.merge(params) )
   end
 
   before {
@@ -40,14 +40,14 @@ describe Rack::Rewritten::Url do
     end
 
     it "must 301 redirect from old translation to latest translation" do
-      ret = @rack.call( call_args.merge('REQUEST_URI' => '/foo/bar', 'PATH_INFO' => '/foo/bar' ))
+      ret = @rack.call request_url('/foo/bar')
       @app.verify
       ret[0].must_equal 301
       ret[1]['Location'].must_equal "http://www.example.org/foo/baz"
     end
 
     it "must keep the query parameters in the 301 redirect" do
-      ret = @rack.call( call_args.merge('REQUEST_URI' => '/foo/bar', 'PATH_INFO' => '/foo/bar', 'QUERY_STRING' => 'w=1' ))
+      ret = @rack.call request_url('/foo/bar', 'QUERY_STRING' => 'w=1')
       @app.verify
       ret[0].must_equal 301
       ret[1]['Location'].must_equal "http://www.example.org/foo/baz?w=1"
@@ -55,7 +55,7 @@ describe Rack::Rewritten::Url do
 
     it "must stay on latest translation" do
       @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
-      ret = @rack.call( call_args.merge('REQUEST_URI' => '/foo/baz', 'PATH_INFO' => '/foo/baz' ))
+      ret = @rack.call request_url('/foo/baz')
       @app.verify
       ret[0].must_equal 200
     end
@@ -64,7 +64,7 @@ describe Rack::Rewritten::Url do
 
       it "must not redirect from resource url to nice url by default" do
         @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
-        ret = @rack.call( call_args.merge('REQUEST_URI' => '/products/1', 'PATH_INFO' => '/products/1' ))
+        ret = @rack.call request_url('/products/1')
         @app.verify
         ret[0].must_equal 200
       end
@@ -74,7 +74,7 @@ describe Rack::Rewritten::Url do
           self.translate_backwards = true
         end
 
-        ret = @rack.call( call_args.merge('REQUEST_URI' => '/products/1', 'PATH_INFO' => '/products/1' ))
+        ret = @rack.call request_url('/products/1')
         @app.verify
         ret[0].must_equal 301
         ret[1]['Location'].must_equal "http://www.example.org/foo/baz"
@@ -105,7 +105,7 @@ describe Rack::Rewritten::Url do
       end
 
       it "must redirect for other entries" do
-        ret = @rack.call( request_url('/no/flags') )
+        ret = @rack.call request_url('/no/flags')
         @app.verify
         ret[0].must_equal 301
         ret[1]['Location'].must_equal "http://www.example.org/final/line"
