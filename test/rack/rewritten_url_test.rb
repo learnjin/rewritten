@@ -60,6 +60,17 @@ describe Rack::Rewritten::Url do
       ret[0].must_equal 200
     end
 
+    describe "/ behavior" do
+      
+      it "must 301 redirect paths with / in the end to their chomped version" do
+        ret = @rack.call request_url('/foo/bar/')
+        @app.verify
+        ret[0].must_equal 301
+        ret[1]['Location'].must_equal "http://www.example.org/foo/baz"
+      end
+
+    end
+
     describe "enforce nice urls" do
 
       it "must not redirect from resource url to nice url by default" do

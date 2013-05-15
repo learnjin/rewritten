@@ -20,9 +20,9 @@ module Rack
 
         path = "#{subdomain}#{req.path_info}"
 
-        if ::Rewritten.includes?(path) or translate_backwards? && ::Rewritten.exist_translation_for?(path) 
+        if ::Rewritten.includes?(path.chomp("/")) or translate_backwards? && ::Rewritten.exist_translation_for?(path) 
 
-          to = ::Rewritten.includes?(path) || path
+          to = ::Rewritten.includes?(path.chomp("/")) || path
 
           current_path = ::Rewritten.get_current_translation(to)
           current_path = current_path.split(":").last
