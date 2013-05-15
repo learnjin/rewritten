@@ -6,7 +6,6 @@ require 'rack/url'
 require 'rack/record'
 require 'rack/html'
 require 'rack/subdomain'
-require 'pry'
 
 module Rewritten
   include Helpers
