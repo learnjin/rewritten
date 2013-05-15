@@ -1,3 +1,8 @@
+== 0.9.0
+
+  * always chomp '/' from request_path
+  * downcase option for Rack::Rewritten::Url 
+
 == 0.8.0
 
   * introduce the [H] flag to stop translating
