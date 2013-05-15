@@ -71,6 +71,30 @@ describe Rack::Rewritten::Url do
 
     end
 
+    describe "caps behavior" do
+      
+      it "must diferentiate caps" do
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        ret = @rack.call request_url('/Foo/Bar')
+        @app.verify
+        ret[0].must_equal 200
+      end
+
+      it "must ignore caps if wished" do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.downcase_before_lookup = true
+        end
+
+        ret = @rack.call request_url('/Foo/Bar')
+
+        @app.verify
+        ret[0].must_equal 301
+        ret[1]['Location'].must_equal "http://www.example.org/foo/baz"
+      end
+
+    end
+
+
     describe "enforce nice urls" do
 
       it "must not redirect from resource url to nice url by default" do

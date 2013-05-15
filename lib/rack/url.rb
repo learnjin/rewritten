@@ -9,6 +9,7 @@ module Rack
       def initialize(app, &block)
         @app = app
         @translate_backwards = false
+        @downcase_before_lookup = false
 
         instance_eval(&block) if block_given?
       end
@@ -19,6 +20,7 @@ module Rack
         subdomain = env["SUBDOMAIN"] ? "#{env["SUBDOMAIN"]}:" : ""
 
         path = "#{subdomain}#{req.path_info}"
+        path.downcase! if downcase_before_lookup?
 
         if ::Rewritten.includes?(path.chomp("/")) or translate_backwards? && ::Rewritten.exist_translation_for?(path) 
 
@@ -69,6 +71,13 @@ module Rack
         @translate_backwards = yes_or_no
       end
 
+      def downcase_before_lookup?
+        @downcase_before_lookup
+      end
+      
+      def downcase_before_lookup=(yes_or_no)
+        @downcase_before_lookup = yes_or_no
+      end
 
       
     end
