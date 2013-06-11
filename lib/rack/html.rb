@@ -20,8 +20,15 @@ module Rack
             links = line.scan(/href="([^"]+)"/).flatten.uniq
             res = line
             links.each do |link|
-              t = ::Rewritten.get_current_translation(link)
-              res.gsub!(/href="#{link}"/, %Q|href="#{t}"|) if t
+
+              if ::Rewritten.exist_translation_for?(link)
+                t = ::Rewritten.get_current_translation(link)
+                res.gsub!(%Q|href="#{link}"|, %Q|href="#{t}"|) if t
+                res.gsub!(%Q|href='#{link}'|, %Q|href='#{t}'|) if t
+                res.gsub!(%Q|href="#{link}?|, %Q|href="#{t}?|) if t
+                res.gsub!(%Q|href='#{link}?|, %Q|href='#{t}?|) if t
+              end
+
             end
             new_response << res
           end
