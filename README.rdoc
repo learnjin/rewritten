@@ -4,6 +4,10 @@ Rewritten is a lookup-based rewriting engine that rewrites requested
 URLs on the fly. The URL manipulations depend on translations found in
 a redis database.
 
+  - [![Code Climate](https://codeclimate.com/github/learnjin/rewritten.png)](https://codeclimate.com/github/learnjin/rewritten)
+  - [![Build Status](https://travis-ci.org/learnjin/rewritten.png?branch=master)](https://travis-ci.org/learnjin/rewritten/)
+  - [![Coverage Status](https://coveralls.io/repos/learnjin/rewritten/badge.png)](https://coveralls.io/r/learnjin/rewritten)
+
 If a matching translation is found, the result of a request is either a
 redirection or a modification of path and request parameters. For URLs
 without translation entries the request is left unmodified.
