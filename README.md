@@ -3,13 +3,9 @@ Rewritten [![Build Status](https://travis-ci.org/learnjin/rewritten.png?branch=m
 
 Rewritten is a lookup-based rewriting engine that rewrites requested URLs on
 the fly. The URL manipulations depend on translations found in a redis
-database.
-
-URLs without translations are passed through while URLs with translations
-result in a either redirection or ultimatively in a modification of path and
-request parameters.
-
-The gem is compromised of several parts:
+database. URLs without translations are passed through while URLs with
+translations result in a either redirection or ultimatively in a modification
+of path and request parameters. The gem is compromised of several parts:
 
 1. A Ruby library for creating, modifying and querying translations.
 2. A Sinatra app for displaying and managing translations
@@ -32,7 +28,6 @@ Rewritten works completely transparent and decoupled as Rack middleware. Add it 
 
     # config.ru
     require 'rewritten'
-    require 'rewritten/server'
     
     Rewritten.redis = Redis.new(host: 'host', port: 'port', password: 'password' )
 
@@ -87,6 +82,8 @@ To query for the current "trade language" use:
 
 Rewritten comes with a Sinatra-based front end for dislaying and
 managing your URL translations (layout taken from Resque). Include it in your Rack stack with:
+
+    require 'rewritten/server'
 
     map "/rewritten" do
       use Rack::Auth::Basic do |username, password|
