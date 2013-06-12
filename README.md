@@ -1,4 +1,5 @@
-= Rewritten 
+Rewritten 
+=========
 
 Rewritten is a lookup-based rewriting engine that rewrites requested
 URLs on the fly. The URL manipulations depend on translations found in
@@ -23,7 +24,7 @@ gem is compromised of six parts:
 6. A Rack app for recording requests (Rack::Rewritten::Record)
 
 
-== New Relic Notice
+## New Relic Notice
 
 There seem to be unresolved issues when Rack::Rewritten::Html is used
 in conjunction with the New Relic gem (being a rack app as well).
@@ -32,7 +33,7 @@ or Rack::Rewritten::Html (pointers in the right debugging direction or
 pull requests are welcome).
 
 
-== Overview
+## Overview
 
 The Rewritten library allows you to create new URL translations and     
 then query for the current "trade language" of an URL.                  
@@ -46,7 +47,7 @@ Translations are removed in a similar fashion.
     Rewritten.remove_translation('/apple-computer/newton', '/products/4e4d3c6a1d41c811e8000009')
 
 
-== Usage in your Rack stack
+## Usage in your Rack stack
 
 To take full advantage of the engine you would be using  at least
 the following stack:
@@ -61,7 +62,7 @@ app. For a Rails app, for instance, you wouldn't need to mess with your
 <tt>routes.rb</tt> or path helpers when dealing with custom URLs.
 
 
-== The Front End
+## The Front End
 
 Rewritten comes with a Sinatra-based front end for dislaying and
 managing your URL translations (in the familiar Resque layout).
@@ -69,7 +70,7 @@ managing your URL translations (in the familiar Resque layout).
 [IMAGE]
 
 
-=== Standalone
+### Standalone
 
 Running Rewritten as a gem in standalone mode is easy:
 
@@ -80,7 +81,7 @@ It's based on Vegas, a thin layer around rackup, and as such configurable as wel
     $ rewritten-web -p 8282
 
 
-=== Rack::URLMap
+### Rack::URLMap
 
 To load Rewritten on a subpath alongside other apps you can make use of URLMap:
 
