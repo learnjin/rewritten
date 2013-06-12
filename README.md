@@ -64,16 +64,23 @@ This way all routes helpers will be translated.
 
 ## Managing Vocabulary
 
-The ruby library allows you to successively add to the vocabulary and query for the current "trade language"
-of an URL.
+To manage the vocabulary from within your Rack app you need to establish a connection to the same
+redis db (on Rails put this into an initializer).
+
+    include 'rewritten'
+    Rewritten.redis = Redis.new(host: 'host', port: 'port', password: 'password' )
+
+The ruby library allows you to successively add and remove vocabulary:
 
     Rewritten.add_translation('/apple-computer/newton', '/products/4e4d3c6a1d41c811e8000009')
     Rewritten.add_translation('/apple/ipad', '/products/4e4d3c6a1d41c811e8000009')
+
+    Rewritten.remove_translation('/failed-computer/newton', '/products/4e4d3c6a1d41c811e8000009')
+
+
+To query for the current "trade language" use:
+
     Rewritten.get_current_translation('/products/4e4d3c6a1d41c811e8000009')         # => "/apple/ipad"
-
-Translations are removed in a similar fashion.
-
-    Rewritten.remove_translation('/apple-computer/newton', '/products/4e4d3c6a1d41c811e8000009')
 
 
 ## The web front end
