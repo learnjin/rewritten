@@ -1,4 +1,4 @@
-Rewritten [![Build Status](https://travis-ci.org/learnjin/rewritten.png?branch=master)](https://travis-ci.org/learnjin/rewritten/) [![Code Climate](https://codeclimate.com/github/learnjin/rewritten.png)](https://codeclimate.com/github/learnjin/rewritten) [![Coverage Status](https://coveralls.io/repos/learnjin/rewritten/badge.png)](https://coveralls.io/r/learnjin/rewritten)
+Rewritten [![Build Status](https://travis-ci.org/learnjin/rewritten.png?branch=master)](https://travis-ci.org/learnjin/rewritten/) [![Csdfode Climate](https://codeclimate.com/github/learnjin/rewritten.png)](https://codeclimate.com/github/learnjin/rewritten) [![Coverage Status](https://coveralls.io/repos/learnjin/rewritten/badge.png)](https://coveralls.io/r/learnjin/rewritten)
 =========
 
 Rewritten is a lookup-based rewriting engine that rewrites requested URLs on
