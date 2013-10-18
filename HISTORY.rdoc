@@ -1,3 +1,11 @@
+== 0.11.0 
+
+  * Partial translations and canonical tags in Rack::Rewritten::Url
+
+== 0.10.0
+
+  * add Rails URL Helpers
+
 == 0.9.0
 
   * always chomp '/' from request_path
@@ -5,7 +13,7 @@
 
 == 0.8.0
 
-  * introduce the [H] flag to stop translating
+  * introduce the [L] flag to stop translating
 
 == 0.7.0
 
