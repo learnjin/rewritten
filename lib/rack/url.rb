@@ -10,6 +10,7 @@ module Rack
         @app = app
         @translate_backwards = false
         @downcase_before_lookup = false
+        @translate_partial = false
 
         instance_eval(&block) if block_given?
       end
@@ -58,6 +59,7 @@ module Rack
             req.path_info = parts.slice(0, parts.size-1).join('/')
             self.call(req.env, parts.last + tail.to_s)
           else
+            req.path_info = (tail ? req.path_info+"/"+tail : req.path_info)
             @app.call(req.env)
           end
         end

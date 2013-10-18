@@ -86,7 +86,7 @@ describe Rack::Rewritten::Url do
         @env['PATH_INFO'].must_equal '/products/1/with_tail'
       end
 
-      it "won't translate segments not by separted by slashes" do
+      it "won't translate segments not by separated by slashes" do
         @rack = Rack::Rewritten::Url.new(@app) do
           self.translate_partial = true
         end
