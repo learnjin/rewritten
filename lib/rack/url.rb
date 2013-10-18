@@ -14,7 +14,7 @@ module Rack
         instance_eval(&block) if block_given?
       end
 
-      def call(env)
+      def call(env, tail=nil)
         req = Rack::Request.new(env)
 
         subdomain = env["SUBDOMAIN"] ? "#{env["SUBDOMAIN"]}:" : ""
@@ -32,9 +32,16 @@ module Rack
           if current_path == req.path_info or ::Rewritten.has_flag?(path, 'L')
             # if this is the current path, rewrite path and parameters
             tpath, tparams = split_to_path_params(to)
-            req.path_info = tpath
-            env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params))
-            @app.call(req.env) 
+
+            if(::Rewritten.has_flag?(path, '*'))
+              env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params).merge({tail: tail.to_s}))
+              req.path_info = tpath
+              @app.call(req.env)
+            else
+              env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params))
+              req.path_info = tpath + (tail ? "/"+tail : "")
+              @app.call(req.env)
+            end
           else
             # if this is not the current path, redirect to current path
             # NOTE: assuming redirection is always to non-subdomain-path
@@ -50,8 +57,15 @@ module Rack
             r.redirect(new_path, 301)
             a = r.finish
           end
-       else
-          @app.call(req.env) 
+        else
+          # This code is so fucking magic!
+          if(path).count('/') > 1
+            parts = path.split('/')
+            req.path_info = parts.slice(0, parts.size-1).join('/')
+            self.call(req.env, parts.last + tail.to_s)
+          else
+            @app.call(req.env)
+          end
         end
       end
 
