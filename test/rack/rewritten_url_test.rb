@@ -60,8 +60,73 @@ describe Rack::Rewritten::Url do
       ret[0].must_equal 200
     end
 
+    describe "partial translation" do
+
+      before {
+        @request_str = '/foo/baz/with_tail'
+        @env = request_url(@request_str)
+        @html_body = <<-HTML
+        <html>
+          <head></head>
+          <body>Hello</body>
+        </html>
+        HTML
+        }
+
+      it "must not translate partials by default" do
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        ret = @rack.call @env
+        @app.verify
+        @env['PATH_INFO'].must_equal @request_str
+      end
+
+      it "must translate partials if enabled" do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.translate_partial = true
+        end
+
+        @app.expect :call, [200, {'Content-Type' => 'text/html'},[]], [Hash]
+
+        ret = @rack.call @env
+        @app.verify
+        @env['PATH_INFO'].must_equal '/products/1/with_tail'
+      end
+
+      it "must add the canonical tag to pages with trail" do
+
+        @rack = Rack::Rewritten::Url.new(lambda{|env| [200, {'Content-Type' => 'text/html'}, [@html_body]]}) do
+          self.translate_partial = true
+        end
+
+        res,env,body = @rack.call(@env)
+        html = body.join("")
+        html.must_include  '<link rel="canonical" href="/foo/baz"/>'
+      end
+
+      it "won't translate segments not by separated by slashes" do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.translate_partial = true
+        end
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        ret = @rack.call @env=request_url('/foo/bazzling')
+        @app.verify
+        @env['PATH_INFO'].must_equal '/foo/bazzling'
+      end
+
+      it "must carry on trail when redirecting" do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.translate_partial = true
+        end
+        ret = @rack.call request_url('/foo/bar/with_tail', 'QUERY_STRING' => 'w=1')
+        @app.verify
+        ret[0].must_equal 301
+        ret[1]['Location'].must_equal "http://www.example.org/foo/baz/with_tail?w=1"
+      end
+
+    end
+
     describe "/ behavior" do
-      
+
       it "must 301 redirect paths with / in the end to their chomped version" do
         ret = @rack.call request_url('/foo/bar/')
         @app.verify
@@ -104,7 +169,7 @@ describe Rack::Rewritten::Url do
         ret[0].must_equal 200
       end
 
-      it "must redirect from resource url to nice url if enabled xxx" do
+      it "must redirect from resource url to nice url if enabled" do
         @rack = Rack::Rewritten::Url.new(@app) do
           self.translate_backwards = true
         end
@@ -147,7 +212,6 @@ describe Rack::Rewritten::Url do
       end
 
     end
-
 
   end
 

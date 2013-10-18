@@ -10,11 +10,12 @@ module Rack
         @app = app
         @translate_backwards = false
         @downcase_before_lookup = false
+        @translate_partial = false
 
         instance_eval(&block) if block_given?
       end
 
-      def call(env)
+      def call(env, tail=nil)
         req = Rack::Request.new(env)
 
         subdomain = env["SUBDOMAIN"] ? "#{env["SUBDOMAIN"]}:" : ""
@@ -32,26 +33,53 @@ module Rack
           if current_path == req.path_info or ::Rewritten.has_flag?(path, 'L')
             # if this is the current path, rewrite path and parameters
             tpath, tparams = split_to_path_params(to)
-            req.path_info = tpath
+
             env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params))
-            @app.call(req.env) 
+            req.path_info = tpath + (tail ? "/"+tail : "")
+            #@app.call(req.env)
+            
+            # add the canonical tag to the body
+            status, headers, response = @app.call(req.env)
+
+            if status == 200 && headers["Content-Type"] =~ /text\/html|application\/xhtml\+xml/
+              body = ""
+              response.each { |part| body << part }
+              index = body.rindex("</head>")
+              if index
+                body.insert(index, %Q|<link rel="canonical" href="#{path}"/>| )
+                headers["Content-Length"] = body.length.to_s
+                response = [body]
+              end
+            end
+
+            [status, headers, response]
+
           else
             # if this is not the current path, redirect to current path
             # NOTE: assuming redirection is always to non-subdomain-path
-            
+
             r = Rack::Response.new
 
             new_path = env["rack.url_scheme"].dup
             new_path << "://"
             new_path << env["HTTP_HOST"].dup.sub(/^#{subdomain.chomp(':')}\./, '')
-            new_path << current_path
+            new_path << current_path + (tail ? "/"+tail : "")
             new_path << '?' << env["QUERY_STRING"] unless (env["QUERY_STRING"]||'').empty?
 
             r.redirect(new_path, 301)
             a = r.finish
           end
-       else
-          @app.call(req.env) 
+        else
+          # Translation of partials (e.g. /some/path/tail -> /translated/path/tail)
+          if(path).count('/') > 1 && translate_partial?
+            parts = path.split('/')
+            req.path_info = parts.slice(0, parts.size-1).join('/')
+            self.call(req.env, parts.last + tail.to_s)
+          else
+            req.path_info = (tail ? req.path_info+"/"+tail : req.path_info)
+            @app.call(req.env)
+
+          end
         end
       end
 
@@ -64,9 +92,9 @@ module Rack
       private
 
       def translate_backwards?
-        @translate_backwards  
+        @translate_backwards
       end
-      
+
       def translate_backwards=(yes_or_no)
         @translate_backwards = yes_or_no
       end
@@ -74,16 +102,18 @@ module Rack
       def downcase_before_lookup?
         @downcase_before_lookup
       end
-      
+
       def downcase_before_lookup=(yes_or_no)
         @downcase_before_lookup = yes_or_no
       end
 
-      
+      def translate_partial?
+        @translate_partial
+      end
+
+      def translate_partial=(yes_or_no)
+        @translate_partial = yes_or_no
+      end
     end
   end
-
 end
-
-
-
