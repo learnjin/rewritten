@@ -33,19 +33,13 @@ module Rack
             # if this is the current path, rewrite path and parameters
             tpath, tparams = split_to_path_params(to)
 
-            if(::Rewritten.has_flag?(path, '*'))
-              env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params).merge({tail: tail.to_s}))
-              req.path_info = tpath
-              @app.call(req.env)
-            else
-              env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params))
-              req.path_info = tpath + (tail ? "/"+tail : "")
-              @app.call(req.env)
-            end
+            env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params))
+            req.path_info = tpath + (tail ? "/"+tail : "")
+            @app.call(req.env)
           else
             # if this is not the current path, redirect to current path
             # NOTE: assuming redirection is always to non-subdomain-path
-            
+
             r = Rack::Response.new
 
             new_path = env["rack.url_scheme"].dup
@@ -58,8 +52,8 @@ module Rack
             a = r.finish
           end
         else
-          # This code is so fucking magic!
-          if(path).count('/') > 1
+          # Translation of partials (e.g. /some/path/trail -> /translated/path/trail)
+          if(path).count('/') > 1 && translate_partial?
             parts = path.split('/')
             req.path_info = parts.slice(0, parts.size-1).join('/')
             self.call(req.env, parts.last + tail.to_s)
@@ -78,9 +72,9 @@ module Rack
       private
 
       def translate_backwards?
-        @translate_backwards  
+        @translate_backwards
       end
-      
+
       def translate_backwards=(yes_or_no)
         @translate_backwards = yes_or_no
       end
@@ -88,16 +82,18 @@ module Rack
       def downcase_before_lookup?
         @downcase_before_lookup
       end
-      
+
       def downcase_before_lookup=(yes_or_no)
         @downcase_before_lookup = yes_or_no
       end
 
-      
+      def translate_partial?
+        @translate_partial
+      end
+
+      def translate_partial=(yes_or_no)
+        @translate_partial = yes_or_no
+      end
     end
   end
-
 end
-
-
-
