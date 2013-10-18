@@ -36,7 +36,24 @@ module Rack
 
             env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params))
             req.path_info = tpath + (tail ? "/"+tail : "")
-            @app.call(req.env)
+            #@app.call(req.env)
+            
+            # add the canonical tag to the body
+            status, headers, response = @app.call(req.env)
+
+            if status == 200 && headers["Content-Type"] =~ /text\/html|application\/xhtml\+xml/
+              body = ""
+              response.each { |part| body << part }
+              index = body.rindex("</head>")
+              if index
+                body.insert(index, %Q|<link rel="canonical" href="#{path}"/>| )
+                headers["Content-Length"] = body.length.to_s
+                response = [body]
+              end
+            end
+
+            [status, headers, response]
+
           else
             # if this is not the current path, redirect to current path
             # NOTE: assuming redirection is always to non-subdomain-path
@@ -61,6 +78,7 @@ module Rack
           else
             req.path_info = (tail ? req.path_info+"/"+tail : req.path_info)
             @app.call(req.env)
+
           end
         end
       end

@@ -65,7 +65,13 @@ describe Rack::Rewritten::Url do
       before {
         @request_str = '/foo/baz/with_tail'
         @env = request_url(@request_str)
-      }
+        @html_body = <<-HTML
+        <html>
+          <head></head>
+          <body>Hello</body>
+        </html>
+        HTML
+        }
 
       it "must not translate partials by default" do
         @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
@@ -79,11 +85,22 @@ describe Rack::Rewritten::Url do
           self.translate_partial = true
         end
 
-        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        @app.expect :call, [200, {'Content-Type' => 'text/html'},[]], [Hash]
 
         ret = @rack.call @env
         @app.verify
         @env['PATH_INFO'].must_equal '/products/1/with_tail'
+      end
+
+      it "must add the canonical tag to pages with trail" do
+
+        @rack = Rack::Rewritten::Url.new(lambda{|env| [200, {'Content-Type' => 'text/html'}, [@html_body]]}) do
+          self.translate_partial = true
+        end
+
+        res,env,body = @rack.call(@env)
+        html = body.join("")
+        html.must_include  '<link rel="canonical" href="/foo/baz"/>'
       end
 
       it "won't translate segments not by separated by slashes" do
