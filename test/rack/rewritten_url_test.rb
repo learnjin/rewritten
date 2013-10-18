@@ -85,6 +85,27 @@ describe Rack::Rewritten::Url do
         @app.verify
         @env['PATH_INFO'].must_equal '/products/1/with_tail'
       end
+
+      it "won't translate segments not by separted by slashes" do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.translate_partial = true
+        end
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        ret = @rack.call @env=request_url('/foo/bazzling')
+        @app.verify
+        @env['PATH_INFO'].must_equal '/foo/bazzling'
+      end
+
+      it "must carry on trail when redirecting" do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.translate_partial = true
+        end
+        ret = @rack.call request_url('/foo/bar/with_tail', 'QUERY_STRING' => 'w=1')
+        @app.verify
+        ret[0].must_equal 301
+        ret[1]['Location'].must_equal "http://www.example.org/foo/baz/with_tail?w=1"
+      end
+
     end
 
     describe "/ behavior" do
