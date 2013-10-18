@@ -124,6 +124,7 @@ describe Rack::Rewritten::Url do
         Rewritten.add_translation('/with/flags2 [L]', '/adwords/target')
         Rewritten.add_translation('/no/flags', '/adwords/target')
         Rewritten.add_translation('/final/line', '/adwords/target')
+        Rewritten.add_translation('/star/flag [*]', '/adwords/target')
       }
 
       it "must stay on [L] flagged froms" do
@@ -144,6 +145,20 @@ describe Rack::Rewritten::Url do
         @app.verify
         ret[0].must_equal 301
         ret[1]['Location'].must_equal "http://www.example.org/final/line"
+      end
+
+      it "must pass tail on [*] flagged froms" do
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        ret = @rack.call request_url('/star/flag/tail')
+        @app.verify
+        ret[0].must_equal 200
+      end
+
+      it "wont pass tail if [*] flag is not present" do
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        ret = @rack.call request_url('/star/flag/tail')
+        @app.verify
+        ret[0].must_equal 404
       end
 
     end
