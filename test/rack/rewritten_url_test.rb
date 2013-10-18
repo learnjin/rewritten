@@ -60,8 +60,35 @@ describe Rack::Rewritten::Url do
       ret[0].must_equal 200
     end
 
+    describe "partial translation" do
+
+      before {
+        @request_str = '/foo/baz/with_tail'
+        @env = request_url(@request_str)
+      }
+
+      it "must not translate partials by default" do
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+        ret = @rack.call @env
+        @app.verify
+        @env['PATH_INFO'].must_equal @request_str
+      end
+
+      it "must translate partials if enabled" do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.translate_partial = true
+        end
+
+        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
+
+        ret = @rack.call @env
+        @app.verify
+        @env['PATH_INFO'].must_equal '/products/1/with_tail'
+      end
+    end
+
     describe "/ behavior" do
-      
+
       it "must 301 redirect paths with / in the end to their chomped version" do
         ret = @rack.call request_url('/foo/bar/')
         @app.verify
@@ -104,7 +131,7 @@ describe Rack::Rewritten::Url do
         ret[0].must_equal 200
       end
 
-      it "must redirect from resource url to nice url if enabled xxx" do
+      it "must redirect from resource url to nice url if enabled" do
         @rack = Rack::Rewritten::Url.new(@app) do
           self.translate_backwards = true
         end
@@ -124,7 +151,6 @@ describe Rack::Rewritten::Url do
         Rewritten.add_translation('/with/flags2 [L]', '/adwords/target')
         Rewritten.add_translation('/no/flags', '/adwords/target')
         Rewritten.add_translation('/final/line', '/adwords/target')
-        Rewritten.add_translation('/star/flag [*]', '/adwords/target')
       }
 
       it "must stay on [L] flagged froms" do
@@ -147,22 +173,7 @@ describe Rack::Rewritten::Url do
         ret[1]['Location'].must_equal "http://www.example.org/final/line"
       end
 
-      it "must pass tail on [*] flagged froms" do
-        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
-        ret = @rack.call request_url('/star/flag/tail')
-        @app.verify
-        ret[0].must_equal 200
-      end
-
-      it "wont pass tail if [*] flag is not present" do
-        @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
-        ret = @rack.call request_url('/star/flag/tail')
-        @app.verify
-        ret[0].must_equal 404
-      end
-
     end
-
 
   end
 

@@ -52,7 +52,7 @@ module Rack
             a = r.finish
           end
         else
-          # Translation of partials (e.g. /some/path/trail -> /translated/path/trail)
+          # Translation of partials (e.g. /some/path/tail -> /translated/path/tail)
           if(path).count('/') > 1 && translate_partial?
             parts = path.split('/')
             req.path_info = parts.slice(0, parts.size-1).join('/')
