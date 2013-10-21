@@ -74,7 +74,7 @@ module Rack
           if(path).count('/') > 1 && translate_partial?
             parts = path.split('/')
             req.path_info = parts.slice(0, parts.size-1).join('/')
-            self.call(req.env, parts.last + tail.to_s)
+            self.call(req.env, parts.last + (tail ? "/" + tail : ""))
           else
             req.path_info = (tail ? req.path_info+"/"+tail : req.path_info)
             @app.call(req.env)

@@ -92,6 +92,21 @@ describe Rack::Rewritten::Url do
         @env['PATH_INFO'].must_equal '/products/1/with_tail'
       end
 
+      it "must work on long, non-translated urls with partial translation enabled" do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.translate_partial = true
+        end
+
+        @app.expect :call, [200, {'Content-Type' => 'text/html'},[]], [Hash]
+
+        url = '/such/a/long/url/with/so/many/slashes/oh/my/god'
+        @env = request_url(url)
+
+        ret = @rack.call @env
+        @app.verify
+        @env['PATH_INFO'].must_equal url
+      end
+
       it "must add the canonical tag to pages with trail" do
 
         @rack = Rack::Rewritten::Url.new(lambda{|env| [200, {'Content-Type' => 'text/html'}, [@html_body]]}) do
