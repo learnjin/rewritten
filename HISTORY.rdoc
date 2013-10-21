@@ -1,3 +1,7 @@
+== 0.11.1 
+
+  * Fixes bug with non-translated urls longer than one segment
+
 == 0.11.0 
 
   * Partial translations and canonical tags in Rack::Rewritten::Url
