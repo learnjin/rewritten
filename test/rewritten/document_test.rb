@@ -7,7 +7,7 @@ describe Rewritten::Document do
       include Rewritten::Document
     end
     @instance = Product.new
-    def @instance.url_for(object); '/products/123'; end
+    def @instance.polymorphic_url(object, options={}); '/products/123'; end
     def @instance.persisted?; true; end
   end
 
@@ -35,7 +35,6 @@ describe Rewritten::Document do
     Rewritten.add_translation('/foo/baz', '/products/123')
 
     @instance.rewritten_urls.must_equal ['/foo/bar', '/foo/baz']         
-
   end
 
   it 'must add a new translation' do
@@ -50,6 +49,17 @@ describe Rewritten::Document do
     @instance.rewritten_url = '/foo/baz'  
     @instance.remove_rewritten_urls
     @instance.rewritten_urls.must_equal []
+  end
+
+  it 'must won\'t add blank and similar translations' do
+    @instance.rewritten_url = '/foo/bar'  
+    @instance.rewritten_urls.must_equal ['/foo/bar']
+    @instance.rewritten_url = nil
+    @instance.rewritten_urls.must_equal ['/foo/bar']
+    @instance.rewritten_url = ""
+    @instance.rewritten_urls.must_equal ['/foo/bar']
+    @instance.rewritten_url = "/foo/bar"
+    @instance.rewritten_urls.must_equal ['/foo/bar']
   end
 
 end
