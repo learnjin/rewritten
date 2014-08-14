@@ -11,6 +11,27 @@ describe Rewritten do
     Rewritten.add_translation('/with/flags  [L12]', '/to3')
   }
 
+  describe 'Rewritten.get_current_translation' do
+
+    it "must give current_translation" do
+      Rewritten.get_current_translation('/to').must_equal '/from2'
+      Rewritten.get_current_translation('/to2').must_equal '/from3'
+      Rewritten.get_current_translation('/to3').must_equal '/with/flags'
+      Rewritten.get_current_translation('/n/a').must_equal '/n/a'
+    end
+
+    it "must find the translation if parameters are added" do
+      Rewritten.add_translation('/from_without_params', '/to_without_params')
+      Rewritten.get_current_translation('/to_without_params?some=param').must_equal '/from_without_params?some=param'
+    end
+
+    it "must translate if protocol and host are given" do
+      Rewritten.add_translation('/from_without_params', '/to_without_params')
+      Rewritten.get_current_translation('http://localhost:3000/to_without_params').must_equal 'http://localhost:3000/from_without_params'
+    end
+
+  end
+
   describe "basic interface" do
 
     it "must translate froms" do
@@ -18,13 +39,6 @@ describe Rewritten do
       Rewritten.translate('/from2').must_equal '/to'
       Rewritten.translate('/from3').must_equal '/to2'
       Rewritten.translate('/with/flags').must_equal '/to3'
-    end
-
-    it "must give current_translation" do
-      Rewritten.get_current_translation('/to').must_equal '/from2'
-      Rewritten.get_current_translation('/to2').must_equal '/from3'
-      Rewritten.get_current_translation('/to3').must_equal '/with/flags'
-      Rewritten.get_current_translation('/n/a').must_equal '/n/a'
     end
 
     it "must return the  complete line with flags" do

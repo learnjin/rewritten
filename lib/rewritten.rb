@@ -187,9 +187,24 @@ module Rewritten
   end
 
   def get_current_translation(path)
+
+    uri = URI.parse(path)
+
     translation = Rewritten.z_range("to:#{path}", -1)
-    return translation if translation
-    return path
+
+    unless translation 
+      translation = Rewritten.z_range("to:#{uri.path}", -1)
+    end
+
+    translation = path unless translation
+
+
+    translated_uri = URI.parse(translation)
+
+    uri.path = translated_uri.path
+    uri.query = [translated_uri.query, uri.query].compact.join('&')
+    uri.query = nil if uri.query == ''
+    uri.to_s
   end
 
   def get_flag_string(from)

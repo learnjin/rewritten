@@ -29,6 +29,7 @@ module Rack
 
           current_path = ::Rewritten.get_current_translation(to)
           current_path = current_path.split(":").last
+          current_path = current_path.split('?')[0]
 
           if current_path == req.path_info or ::Rewritten.has_flag?(path, 'L')
             # if this is the current path, rewrite path and parameters
