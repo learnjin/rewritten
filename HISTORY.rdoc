@@ -1,3 +1,6 @@
+== 0.13.0
+  * Find translations even for absolute urls and urls with query parameters
+
 == 0.12.0
 
   * Add the Rewritten::Document module that adds virtual attribute accessors (rewritten_url) to a rails model

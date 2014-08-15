@@ -196,11 +196,10 @@ module Rewritten
       translation = Rewritten.z_range("to:#{uri.path}", -1)
     end
 
-    translation = path unless translation
-
+    # return path as is if no translation found
+    return path unless translation
 
     translated_uri = URI.parse(translation)
-
     uri.path = translated_uri.path
     uri.query = [translated_uri.query, uri.query].compact.join('&')
     uri.query = nil if uri.query == ''

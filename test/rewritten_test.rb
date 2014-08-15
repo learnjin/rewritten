@@ -25,6 +25,10 @@ describe Rewritten do
       Rewritten.get_current_translation('/to_without_params?some=param').must_equal '/from_without_params?some=param'
     end
 
+    it "must not add parameters twice if no translation is found" do
+      Rewritten.get_current_translation('/no/translation?some=param').must_equal '/no/translation?some=param'
+    end
+
     it "must translate if protocol and host are given" do
       Rewritten.add_translation('/from_without_params', '/to_without_params')
       Rewritten.get_current_translation('http://localhost:3000/to_without_params').must_equal 'http://localhost:3000/from_without_params'
