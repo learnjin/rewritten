@@ -8,6 +8,7 @@ describe Rack::Rewritten::Url do
       'SCRIPT_INFO'=> '',
       'PATH_INFO' => '/foo/with/params',
       'QUERY_STRING' => '',
+      'SERVER_PORT' => 80,
       'rack.input' => '',
       'rack.url_scheme' => 'http'}.merge(overrides)
   end
@@ -115,7 +116,7 @@ describe Rack::Rewritten::Url do
 
         res,env,body = @rack.call(@env)
         html = body.join("")
-        html.must_include  '<link rel="canonical" href="/foo/baz"/>'
+        html.must_include  '<link rel="canonical" href="http://www.example.org/foo/baz"/>'
       end
 
       it "won't translate segments not by separated by slashes" do
