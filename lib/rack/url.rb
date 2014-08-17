@@ -37,29 +37,8 @@ module Rack
 
             env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params))
             req.path_info = tpath + (tail ? "/"+tail : "")
-            #@app.call(req.env)
-            
-            # add the canonical tag to the body
-            status, headers, response = @app.call(req.env)
 
-            if status == 200 && headers["Content-Type"] =~ /text\/html|application\/xhtml\+xml/
-              body = ""
-              response.each { |part| body << part }
-              index = body.rindex("</head>")
-              if index
-
-                canonical_req = req.dup
-                canonical_req.path_info = current_path
-                canonical_req.env['QUERY_STRING'] = nil   # point to base url w/o query string
-
-                body.insert(index, %Q|<link rel="canonical" href="#{canonical_req.url}"/>| )
-                headers["Content-Length"] = body.length.to_s
-                response = [body]
-              end
-            end
-
-            [status, headers, response]
-
+	    @app.call(req.env)
           else
             # if this is not the current path, redirect to current path
             # NOTE: assuming redirection is always to non-subdomain-path
@@ -77,15 +56,14 @@ module Rack
           end
         else
           # Translation of partials (e.g. /some/path/tail -> /translated/path/tail)
-          if(path).count('/') > 1 && translate_partial?
-            parts = path.split('/')
-            req.path_info = parts.slice(0, parts.size-1).join('/')
-            self.call(req.env, parts.last + (tail ? "/" + tail : ""))
-          else
+          #if(path).count('/') > 1 && translate_partial?
+          #  parts = path.split('/')
+          #  req.path_info = parts.slice(0, parts.size-1).join('/')
+          #  self.call(req.env, parts.last + (tail ? "/" + tail : ""))
+          #else
             req.path_info = (tail ? req.path_info+"/"+tail : req.path_info)
-            @app.call(req.env)
-
-          end
+	    @app.call(req.env)
+          #end
         end
       end
 
@@ -93,7 +71,6 @@ module Rack
         path, query_string = path_and_query.split('?').push('')[0..1]
         [path, Rack::Utils.parse_query(query_string)] 
       end
-
 
       private
 

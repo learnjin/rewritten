@@ -68,6 +68,8 @@ describe Rack::Rewritten::Url do
         @env = request_url(@request_str)
         }
 
+      after{ Rewritten.translate_partial = false }
+
       it "must not translate partials by default" do
         @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
         ret = @rack.call @env
@@ -79,6 +81,8 @@ describe Rack::Rewritten::Url do
         @rack = Rack::Rewritten::Url.new(@app) do
           self.translate_partial = true
         end
+
+	Rewritten.translate_partial = true
 
         @app.expect :call, [200, {'Content-Type' => 'text/html'},[]], [Hash]
 
@@ -122,36 +126,6 @@ describe Rack::Rewritten::Url do
         ret[0].must_equal 301
         ret[1]['Location'].must_equal "http://www.example.org/foo/baz/with_tail?w=1"
       end
-
-    end
-
-    describe 'canonical tag' do 
-      before do
-        @html_body = <<-HTML
-        <html>
-          <head></head>
-          <body>Hello</body>
-        </html>
-        HTML
-        @rack = Rack::Rewritten::Url.new(lambda{|env| [200, {'Content-Type' => 'text/html'}, [@html_body]]})
-      end
-
-      it "must add the canonical tag to url without param" do
-        res,env,body = @rack.call request_url('/foo/baz').merge('QUERY_STRING' => 'some=param' )
-        html = body.join("")
-        html.must_include  '<link rel="canonical" href="http://www.example.org/foo/baz"/>'
-      end
-
-      it "must add the canonical tag to pages with trail" do
-        @rack = Rack::Rewritten::Url.new(lambda{|env| [200, {'Content-Type' => 'text/html'}, [@html_body]]}) do
-          self.translate_partial = true
-        end
-      
-        res,env,body = @rack.call request_url('/foo/baz/with/tail')
-        html = body.join("")
-        html.must_include  '<link rel="canonical" href="http://www.example.org/foo/baz"/>'
-      end
-
     end
 
 
