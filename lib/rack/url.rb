@@ -47,8 +47,11 @@ module Rack
               response.each { |part| body << part }
               index = body.rindex("</head>")
               if index
+
                 canonical_req = req.dup
-                canonical_req.path_info = current_path 
+                canonical_req.path_info = current_path
+                canonical_req.env['QUERY_STRING'] = nil   # point to base url w/o query string
+
                 body.insert(index, %Q|<link rel="canonical" href="#{canonical_req.url}"/>| )
                 headers["Content-Length"] = body.length.to_s
                 response = [body]
