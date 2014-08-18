@@ -11,7 +11,7 @@ describe Rewritten do
     Rewritten.add_translation('/with/flags  [L12]', '/to3')
   }
 
-  describe 'Rewritten.get_current_translation' do
+  describe 'Rewritten.get_current_translation for to-target' do
 
     it "must give current_translation" do
       Rewritten.get_current_translation('/to').must_equal '/from2'
@@ -32,6 +32,31 @@ describe Rewritten do
     it "must translate if protocol and host are given" do
       Rewritten.add_translation('/from_without_params', '/to_without_params')
       Rewritten.get_current_translation('http://localhost:3000/to_without_params').must_equal 'http://localhost:3000/from_without_params'
+    end
+
+  end
+
+  describe 'get_infinitive (always from conjugated for -> for)' do
+
+    it 'must remove query parameters from non translatable foreign path' do
+      Rewritten.infinitive('/no/translation').must_equal '/no/translation'
+      Rewritten.infinitive('/no/translation/').must_equal '/no/translation'
+      Rewritten.infinitive('/no/translation?some=param&another=2').must_equal '/no/translation'
+    end
+
+    it 'must remove query parameters from translatable foreign path' do
+      Rewritten.infinitive('/from').must_equal '/from2'
+      Rewritten.infinitive('/from/').must_equal '/from2'
+      Rewritten.infinitive('/from?some=param&another=2').must_equal '/from2'
+    end
+
+    describe 'context translate partial' do
+      before{ Rewritten.translate_partial = true }
+      after{ Rewritten.translate_partial = false }
+
+      it 'must remove trail if translpartial is enabled' do
+        Rewritten.infinitive('/from/with/trail?and=param').must_equal '/from2'
+      end
     end
 
   end
