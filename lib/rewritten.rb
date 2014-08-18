@@ -244,7 +244,6 @@ module Rewritten
     end
   end
 
-
   def base_from(some_from)
     base_from = some_from.split('?')[0].chomp('/')
     if translate(some_from)

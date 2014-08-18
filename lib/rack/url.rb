@@ -37,7 +37,6 @@ module Rack
             env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params))
             req.path_info = tpath + ::Rewritten.appendix(req.path_info)
             @app.call(req.env)
-
           else
             # if this is not the current path, redirect to current path
             # NOTE: assuming redirection is always to non-subdomain-path
@@ -63,7 +62,6 @@ module Rack
         path, query_string = path_and_query.split('?').push('')[0..1]
         [path, Rack::Utils.parse_query(query_string)] 
       end
-
 
       private
 

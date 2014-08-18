@@ -73,6 +73,8 @@ describe Rack::Rewritten::Url do
         Rewritten.translate_partial = false
       end
 
+      after{ Rewritten.translate_partial = false }
+
       it "must not translate partials by default" do
         Rewritten.translate_partial = false
         @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
@@ -115,7 +117,6 @@ describe Rack::Rewritten::Url do
         ret[0].must_equal 301
         ret[1]['Location'].must_equal "http://www.example.org/foo/baz/with_tail?w=1"
       end
-
     end
 
     describe "/ behavior" do
