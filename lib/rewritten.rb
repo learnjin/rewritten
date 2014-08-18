@@ -229,6 +229,8 @@ module Rewritten
   # infinitive for translations only!
   def infinitive(some_from)
 
+    some_from ||= ''
+
     conjugated = some_from.chomp('/')
 
     to = translate(conjugated)
@@ -240,7 +242,8 @@ module Rewritten
       infinitive(shorter_path)
     else
       conjugated = get_current_translation(to) if to
-      conjugated.split('?')[0].chomp('/')
+      conjugated = conjugated.split('?')[0] || ''
+      conjugated.chomp('/')
     end
   end
 
