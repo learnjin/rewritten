@@ -21,19 +21,18 @@ module Rack
           index = body.rindex("</head>")
           if index
             # go with a request duplicate since infinitive works on translations
-	    target_req = req.dup
-	    target_req.path_info = ::Rewritten.infinitive( ::Rewritten.get_current_translation(req.path) )
-	    target_req.env['QUERY_STRING'] = ''
-	    #target = ::Rewritten.get_current_translation(target_req.url)
-	    target = target_req.url
+            target_req = req.dup
+            target_req.path_info = ::Rewritten.infinitive( ::Rewritten.get_current_translation(req.path) )
+            target_req.env['QUERY_STRING'] = ''
+            target = target_req.url
 
             body.insert(index, %Q|<link rel="canonical" href="#{target}"/>| )
             headers["Content-Length"] = body.length.to_s
             response = [body]
           end
 
-          [status, headers, response]
         end
+        [status, headers, response]
       end
 
     end

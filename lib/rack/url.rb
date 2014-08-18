@@ -87,7 +87,7 @@ module Rack
 
       def translate_partial=(yes_or_no)
         $stderr.puts "DEPRECATED. Please use Rewritten.translate_partial"
-        Rewritten.translate_partial = yes_or_no
+        ::Rewritten.translate_partial = yes_or_no
       end
     end
   end
