@@ -38,6 +38,10 @@ describe Rewritten do
 
   describe 'get_infinitive (always from conjugated for -> for)' do
 
+    it 'must work with nil' do
+      Rewritten.infinitive(nil).must_equal ''
+    end
+
     it 'must remove query parameters from non translatable foreign path' do
       Rewritten.infinitive('/no/translation').must_equal '/no/translation'
       Rewritten.infinitive('/no/translation/').must_equal '/no/translation'
