@@ -8,6 +8,7 @@ describe Rack::Rewritten::Url do
       'SCRIPT_INFO'=> '',
       'PATH_INFO' => '/foo/with/params',
       'QUERY_STRING' => '',
+      'SERVER_PORT' => 80,
       'rack.input' => '',
       'rack.url_scheme' => 'http'}.merge(overrides)
   end
@@ -62,18 +63,20 @@ describe Rack::Rewritten::Url do
 
     describe "partial translation" do
 
-      before {
+      before do 
         @request_str = '/foo/baz/with_tail'
         @env = request_url(@request_str)
-        @html_body = <<-HTML
-        <html>
-          <head></head>
-          <body>Hello</body>
-        </html>
-        HTML
-        }
+        Rewritten.translate_partial = true 
+      end 
+      
+      after do
+        Rewritten.translate_partial = false
+      end
+
+      after{ Rewritten.translate_partial = false }
 
       it "must not translate partials by default" do
+        Rewritten.translate_partial = false
         @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
         ret = @rack.call @env
         @app.verify
@@ -81,21 +84,14 @@ describe Rack::Rewritten::Url do
       end
 
       it "must translate partials if enabled" do
-        @rack = Rack::Rewritten::Url.new(@app) do
-          self.translate_partial = true
-        end
-
+        Rewritten.translate_partial = true 
         @app.expect :call, [200, {'Content-Type' => 'text/html'},[]], [Hash]
-
         ret = @rack.call @env
         @app.verify
         @env['PATH_INFO'].must_equal '/products/1/with_tail'
       end
 
       it "must work on long, non-translated urls with partial translation enabled" do
-        @rack = Rack::Rewritten::Url.new(@app) do
-          self.translate_partial = true
-        end
 
         @app.expect :call, [200, {'Content-Type' => 'text/html'},[]], [Hash]
 
@@ -107,21 +103,8 @@ describe Rack::Rewritten::Url do
         @env['PATH_INFO'].must_equal url
       end
 
-      it "must add the canonical tag to pages with trail" do
-
-        @rack = Rack::Rewritten::Url.new(lambda{|env| [200, {'Content-Type' => 'text/html'}, [@html_body]]}) do
-          self.translate_partial = true
-        end
-
-        res,env,body = @rack.call(@env)
-        html = body.join("")
-        html.must_include  '<link rel="canonical" href="/foo/baz"/>'
-      end
-
+    
       it "won't translate segments not by separated by slashes" do
-        @rack = Rack::Rewritten::Url.new(@app) do
-          self.translate_partial = true
-        end
         @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
         ret = @rack.call @env=request_url('/foo/bazzling')
         @app.verify
@@ -129,15 +112,11 @@ describe Rack::Rewritten::Url do
       end
 
       it "must carry on trail when redirecting" do
-        @rack = Rack::Rewritten::Url.new(@app) do
-          self.translate_partial = true
-        end
         ret = @rack.call request_url('/foo/bar/with_tail', 'QUERY_STRING' => 'w=1')
         @app.verify
         ret[0].must_equal 301
         ret[1]['Location'].must_equal "http://www.example.org/foo/baz/with_tail?w=1"
       end
-
     end
 
     describe "/ behavior" do

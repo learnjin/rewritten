@@ -1,3 +1,6 @@
+== 0.14.0
+  * Extract canonical to own rack app
+
 == 0.13.0
   * Find translations even for absolute urls and urls with query parameters
 

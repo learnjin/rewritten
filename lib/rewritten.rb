@@ -6,6 +6,7 @@ require 'rack/url'
 require 'rack/record'
 require 'rack/html'
 require 'rack/subdomain'
+require 'rack/canonical'
 require 'rewritten/document'
 
 module Rewritten
@@ -38,6 +39,14 @@ module Rewritten
     else
       @redis = Redis::Namespace.new(:rewritten, :redis => server)
     end
+  end
+
+  def translate_partial=(yes_or_no)
+    @translate_partial = yes_or_no
+  end
+
+  def translate_partial?
+    @translate_partial
   end
 
   # Returns the current Redis connection. If none has been created, will
@@ -186,24 +195,73 @@ module Rewritten
     Rewritten.redis.zrange("to:#{to}", 0, -1)
   end
 
-  def get_current_translation(path)
+  def get_current_translation(path, tail=nil)
 
     uri = URI.parse(path)
 
+    # find directly
     translation = Rewritten.z_range("to:#{path}", -1)
-
+   
     unless translation 
       translation = Rewritten.z_range("to:#{uri.path}", -1)
     end
 
-    # return path as is if no translation found
-    return path unless translation
+    if translation.nil?
+      if translate_partial? && path.count('/') > 1
+        parts = path.split('/')
+        shorter_path = parts.slice(0, parts.size-1).join('/')
+        appendix = parts.last + (tail ? "/" + tail : "")
+        return get_current_translation(shorter_path, appendix) 
+      else
+        return path
+      end
+    end
 
-    translated_uri = URI.parse(translation)
+    complete_path = (tail ? translation+"/"+tail : translation)
+    translated_uri = URI.parse(complete_path)
     uri.path = translated_uri.path
     uri.query = [translated_uri.query, uri.query].compact.join('&')
     uri.query = nil if uri.query == ''
     uri.to_s
+  end
+
+
+  # infinitive for translations only!
+  def infinitive(some_from)
+
+    conjugated = some_from.chomp('/')
+
+    to = translate(conjugated)
+    to = translate(conjugated.split('?')[0]) unless to
+
+    if to.nil? && translate_partial? && conjugated.count('/') > 1 
+      parts = conjugated.split('/')
+      shorter_path = parts.slice(0, parts.size-1).join('/')
+      infinitive(shorter_path)
+    else
+      conjugated = get_current_translation(to) if to
+      conjugated.split('?')[0].chomp('/')
+    end
+  end
+
+  def base_from(some_from)
+    base_from = some_from.split('?')[0].chomp('/')
+    if translate(some_from)
+      some_from
+    elsif translate(base_from)
+      base_from
+    elsif translate_partial? && base_from.count('/') > 1
+      parts = base_from.split('/')
+      base_from(parts.slice(0,parts.size-1).join('/'))
+    else
+      nil
+    end
+  end
+
+  def appendix(some_from)
+    base = base_from(some_from) || ''
+    result = some_from.partition( base ).last
+    result.chomp('/')
   end
 
   def get_flag_string(from)
@@ -240,7 +298,17 @@ module Rewritten
   end
 
   def includes?(path)
-    Rewritten.redis.hget("from:#{path}", :to)
+
+    result = Rewritten.redis.hget("from:#{path.chomp('/')}", :to)
+    result = Rewritten.redis.hget("from:#{path.split('?')[0]}", :to) unless result
+
+    if result.nil? && translate_partial? && path.count('/') > 1
+      parts = path.split('/')
+      includes?( parts.slice(0,parts.size-1).join('/') )
+    else
+      result
+    end
+
   end
 
   # return the number of froms
