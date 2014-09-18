@@ -1,4 +1,4 @@
 module Rewritten
-  VERSION = "0.14.2"
+  VERSION = "0.15.0"
 end
 
