@@ -1,3 +1,7 @@
+== 0.15.0
+
+  * Support external targets in redirects
+
 == 0.14.0
   * Extract canonical to own rack app
 
