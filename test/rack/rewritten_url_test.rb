@@ -61,6 +61,24 @@ describe Rack::Rewritten::Url do
       ret[0].must_equal 200
     end
 
+    describe 'external redirection' do
+
+      before {
+        @app = MiniTest::Mock.new
+        @rack = Rack::Rewritten::Url.new(@app)
+
+        Rewritten.add_translation '/external/target', 'http://www.external.com'
+      }
+
+      it "must redirect to external target" do
+        ret = @rack.call request_url('/external/target')
+        @app.verify
+        ret[0].must_equal 301
+        ret[1]['Location'].must_equal "http://www.external.com"
+      end
+
+    end
+
     describe "partial translation" do
 
       before do 

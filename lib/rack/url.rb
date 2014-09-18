@@ -14,6 +14,14 @@ module Rack
         instance_eval(&block) if block_given?
       end
 
+      def is_internal_target?(url)
+        url.nil? or url.start_with?('/') or url.start_with?('http://www.example.org')
+      end
+
+      def is_external_target?(url)
+        !is_internal_target?(url)
+      end
+
       def call(env)
         req = Rack::Request.new(env)
 
@@ -22,7 +30,13 @@ module Rack
         path = "#{subdomain}#{req.path_info}"
         path.downcase! if downcase_before_lookup?
 
-        if ::Rewritten.includes?(path.chomp("/")) or backwards=( translate_backwards? && ::Rewritten.exist_translation_for?(path) )
+        target_url = ::Rewritten.translate(path)
+
+        if is_external_target?(target_url)
+          r = Rack::Response.new
+          r.redirect(target_url, 301)
+          r.finish
+        elsif ::Rewritten.includes?(path.chomp("/")) or backwards=( translate_backwards? && ::Rewritten.exist_translation_for?(path) )
 
           to = ::Rewritten.includes?(path.chomp("/")) || path
 
