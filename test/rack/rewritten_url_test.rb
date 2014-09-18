@@ -65,7 +65,9 @@ describe Rack::Rewritten::Url do
 
       before {
         @app = MiniTest::Mock.new
-        @rack = Rack::Rewritten::Url.new(@app)
+        @rack = Rack::Rewritten::Url.new(@app) do |config|
+          config.base_url = 'http://www.example.org'
+        end
 
         Rewritten.add_translation '/external/target', 'http://www.external.com'
       }
