@@ -14,12 +14,10 @@ module Rack
       lines <<  req.env.inspect
       lines <<  "SUBDOMAIN: #{env['SUBDOMAIN']}"
       lines << '<a href="/some/resource">'
-      [200, {"Content-Type"  => "text/plain"}, lines.join("\n")]
+      [200, {"Content-Type"  => "text/plain"}, [lines.join("\n")]]
     end
 
   end
 
 end
-
-
 
