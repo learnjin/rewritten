@@ -21,6 +21,7 @@ describe Rack::Rewritten::Url do
     Rewritten.add_translation '/foo/bar', '/products/1'
     Rewritten.add_translation '/foo/baz', '/products/1'
     Rewritten.add_translation '/foo/with/params', '/products/2?w=1'
+    Rewritten.add_translation '/überfoo', '/uber'
   }
 
   describe "redirection behavior" do
@@ -241,6 +242,12 @@ describe Rack::Rewritten::Url do
     it "must set PATH_INFO to /products/2" do
       @rack.call(@initial_args)
       @initial_args['PATH_INFO'].must_equal "/products/2" 
+    end
+
+    it "must set PATH_INFO with Umlauts" do
+      @initial_args = request_url( URI.encode('/überfoo') )
+      @rack.call(@initial_args)
+      @initial_args['PATH_INFO'].must_equal "/uber"
     end
 
     it "must set QUERY_STRING to w=1" do

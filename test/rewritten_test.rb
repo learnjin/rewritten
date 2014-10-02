@@ -34,6 +34,11 @@ describe Rewritten do
       Rewritten.get_current_translation('http://localhost:3000/to_without_params').must_equal 'http://localhost:3000/from_without_params'
     end
 
+    it "must work with Umlauts and Encoded Umlauts" do
+      Rewritten.add_translation('/ÜberFoo', '/to')
+      Rewritten.get_current_translation('/to').must_equal '/ÜberFoo'
+    end
+
   end
 
   describe 'get_infinitive (always from conjugated for -> for)' do
@@ -65,7 +70,7 @@ describe Rewritten do
 
   end
 
-  describe "basic interface" do
+  describe ".translate" do
 
     it "must translate froms" do
       Rewritten.translate('/from').must_equal '/to'
@@ -74,15 +79,31 @@ describe Rewritten do
       Rewritten.translate('/with/flags').must_equal '/to3'
     end
 
+    it 'must translate encoded umlauts' do
+      Rewritten.add_translation('/überfoo', '/uber')
+      Rewritten.translate(URI.encode('/überfoo')).must_equal '/uber' 
+    end
+
+  end
+
+  describe ".full_line" do
     it "must return the  complete line with flags" do
       Rewritten.full_line('/from').must_equal '/from'
       Rewritten.full_line('/with/flags').must_equal '/with/flags [L12]'
     end
+  end
 
+  describe ".all_tos" do
     it "must give all tos" do
       Rewritten.all_tos.sort.must_equal ["/to", "/to2", "/to3"] 
     end
+  end
 
+  describe '.includes?' do
+    it 'works for Umlauts' do
+      Rewritten.add_translation('/überfoo', '/uber')
+      Rewritten.includes?( URI.encode('/überfoo') ).wont_equal nil
+    end
   end
 
 
