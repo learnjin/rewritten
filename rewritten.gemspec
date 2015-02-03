@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency "vegas",           "~> 0.1.2"
   s.add_dependency "sinatra",         ">= 0.9.2"
   s.add_dependency "multi_json",      "~> 1.0"
+  s.add_dependency "activesupport"
 
   s.add_development_dependency "rake"
   s.add_development_dependency "minitest"
