@@ -7,7 +7,8 @@ describe Rewritten::Document do
       include Rewritten::Document
     end
     @instance = Product.new
-    def @instance.polymorphic_url(object, options={}); '/products/123'; end
+    def @instance.id; 123; end
+    def @instance.polymorphic_url(object, options={}); "/products/#{self.id}"; end
     def @instance.persisted?; true; end
   end
 
@@ -24,9 +25,23 @@ describe Rewritten::Document do
     @instance.rewritten_url.must_equal "" 
   end
 
-  it 'must return translation when persisted' do
-    Rewritten.add_translation('/foo/bar', '/products/123') 
-    @instance.rewritten_url.must_equal '/foo/bar'
+  describe 'add translation' do
+
+    describe 'url_for not overriden' do
+      it 'must return translation when persisted' do
+        Rewritten.add_translation('/foo/bar', '/products/123') 
+        @instance.rewritten_url.must_equal '/foo/bar'
+      end
+    end
+
+    describe 'url_to overriden' do
+      it 'must return translation when persisted' do
+        Rewritten.add_translation('/foo/bar', '/products/123') 
+        def @instance.polymorphic_url(object, options={}); '/foo/bar'; end
+        Rewritten.translate(@instance.rewritten_url).must_equal '/products/123'
+      end
+    end
+
   end
 
   it 'must return all translations as array' do
