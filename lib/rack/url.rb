@@ -50,8 +50,7 @@ module Rack
           if (current_path == req.path_info) or (::Rewritten.base_from(req.path_info) == current_path) or ::Rewritten.has_flag?(path, 'L')
             # if this is the current path, rewrite path and parameters
             tpath, tparams = split_to_path_params(to)
-
-            env['QUERY_STRING'] = Rack::Utils.build_query(tparams.merge(req.params))
+            env['QUERY_STRING'] = Rack::Utils.build_nested_query(tparams.merge(req.params))
             req.path_info = tpath + ::Rewritten.appendix(req.path_info)
             @app.call(req.env)
           else
@@ -77,7 +76,7 @@ module Rack
 
       def split_to_path_params(path_and_query)
         path, query_string = path_and_query.split('?').push('')[0..1]
-        [path, Rack::Utils.parse_query(query_string)] 
+        [path, Rack::Utils.parse_query(query_string)]
       end
 
       private
