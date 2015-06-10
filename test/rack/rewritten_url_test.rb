@@ -12,7 +12,7 @@ describe Rack::Rewritten::Url do
       'rack.input' => '',
       'rack.url_scheme' => 'http'}.merge(overrides)
   end
-  
+
   def request_url(url, params={})
     call_args.merge({'REQUEST_URI' => url, 'PATH_INFO' => url}.merge(params) )
   end
@@ -83,12 +83,12 @@ describe Rack::Rewritten::Url do
 
     describe "partial translation" do
 
-      before do 
+      before do
         @request_str = '/foo/baz/with_tail'
         @env = request_url(@request_str)
-        Rewritten.translate_partial = true 
-      end 
-      
+        Rewritten.translate_partial = true
+      end
+
       after do
         Rewritten.translate_partial = false
       end
@@ -104,7 +104,7 @@ describe Rack::Rewritten::Url do
       end
 
       it "must translate partials if enabled" do
-        Rewritten.translate_partial = true 
+        Rewritten.translate_partial = true
         @app.expect :call, [200, {'Content-Type' => 'text/html'},[]], [Hash]
         ret = @rack.call @env
         @app.verify
@@ -123,7 +123,7 @@ describe Rack::Rewritten::Url do
         @env['PATH_INFO'].must_equal url
       end
 
-    
+
       it "won't translate segments not by separated by slashes" do
         @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
         ret = @rack.call @env=request_url('/foo/bazzling')
@@ -151,7 +151,7 @@ describe Rack::Rewritten::Url do
     end
 
     describe "caps behavior" do
-      
+
       it "must diferentiate caps" do
         @app.expect :call, [200, {'Content-Type' => 'text/plain'},[""]], [Hash]
         ret = @rack.call request_url('/Foo/Bar')
@@ -240,7 +240,7 @@ describe Rack::Rewritten::Url do
 
     it "must set PATH_INFO to /products/2" do
       @rack.call(@initial_args)
-      @initial_args['PATH_INFO'].must_equal "/products/2" 
+      @initial_args['PATH_INFO'].must_equal "/products/2"
     end
 
     it "must set QUERY_STRING to w=1" do
@@ -254,9 +254,15 @@ describe Rack::Rewritten::Url do
       @initial_args['QUERY_STRING'].split('&').sort.must_equal ['s=1', 'w=1']
     end
 
+    it "must merge nested rails style QUERY parameters" do
+      @initial_args.merge!('QUERY_STRING' => 'x[id]=1')
+      @rack.call(@initial_args)
+      @initial_args['QUERY_STRING'].split('&').sort.map{|s| URI.unescape(s)}.must_equal ['w=1', 'x[id]=1']
+    end
+
+
   end
 
 
 
 end
-
