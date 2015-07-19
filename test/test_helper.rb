@@ -1,9 +1,9 @@
+require 'coveralls'
+Coveralls.wear!
+
 require 'rewritten'
 require 'minitest/autorun'
 require 'pry'
-require 'coveralls'
-
-Coveralls.wear!
 
 class Minitest::Spec 
 

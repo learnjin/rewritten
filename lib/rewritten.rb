@@ -188,7 +188,9 @@ module Rewritten
   end
 
   def translate(from)
-    redis.hget("from:#{from}", :to)
+    return nil if from.nil?
+    decoded_from = URI.decode(from)
+    redis.hget("from:#{decoded_from}", :to)
   end
 
   def get_all_translations(to)
@@ -197,11 +199,12 @@ module Rewritten
 
   def get_current_translation(path, tail=nil)
 
-    uri = URI.parse(path)
+    uri = URI.parse( URI.encode(path) )
 
-    # find directly
+    # try to find absolute path
     translation = Rewritten.z_range("to:#{path}", -1)
    
+    # try to find relative path
     unless translation 
       translation = Rewritten.z_range("to:#{uri.path}", -1)
     end
@@ -218,11 +221,11 @@ module Rewritten
     end
 
     complete_path = (tail ? translation+"/"+tail : translation)
-    translated_uri = URI.parse(complete_path)
+    translated_uri = URI.parse( URI.encode(complete_path) )
     uri.path = translated_uri.path
     uri.query = [translated_uri.query, uri.query].compact.join('&')
     uri.query = nil if uri.query == ''
-    uri.to_s
+    URI.decode(uri.to_s)
   end
 
 
@@ -301,6 +304,8 @@ module Rewritten
   end
 
   def includes?(path)
+
+    path = URI.decode(path)
 
     result = Rewritten.redis.hget("from:#{path.chomp('/')}", :to)
     result = Rewritten.redis.hget("from:#{path.split('?')[0]}", :to) unless result

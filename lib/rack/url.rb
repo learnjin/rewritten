@@ -46,6 +46,7 @@ module Rack
           current_path = ::Rewritten.get_current_translation(to)
           current_path = current_path.split(":").last
           current_path = current_path.split('?')[0]
+          current_path = URI.encode(current_path)
 
           if (current_path == req.path_info) or (::Rewritten.base_from(req.path_info) == current_path) or ::Rewritten.has_flag?(path, 'L')
             # if this is the current path, rewrite path and parameters
