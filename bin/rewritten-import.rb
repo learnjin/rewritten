@@ -7,28 +7,27 @@ require 'rewritten'
 require 'multi_json'
 
 options = {
-  :drop => false
+  drop: false
 }
 
 op = OptionParser.new do |opts|
-  opts.banner = "Usage: rewriten-dump.rb [options]"
+  opts.banner = 'Usage: rewriten-dump.rb [options]'
 
-  opts.on("-v", "--verbose", "be more verbose") do |v|
+  opts.on('-v', '--verbose', 'be more verbose') do |v|
     options[:verbose] = v
   end
 
-  opts.on("-f", "--file FILE", 'input file') do |o|
+  opts.on('-f', '--file FILE', 'input file') do |o|
     options[:file] = o
   end
 
-  opts.on("-u", "--uri URI", 'uri to the redis db') do |uri|
+  opts.on('-u', '--uri URI', 'uri to the redis db') do |uri|
     options[:uri] = uri
   end
 
-  opts.on("-d", "--drop", 'drop translations first') do
+  opts.on('-d', '--drop', 'drop translations first') do
     options[:drop] = true
   end
-
 end
 
 op.parse!
@@ -38,15 +37,13 @@ unless options[:file]
   exit
 end
 
-Rewritten.redis = options[:uri] if options[:uri] 
+Rewritten.redis = options[:uri] if options[:uri]
 
 Rewritten.clear_translations if options[:drop]
 
 File.open(options[:file]).each do |line|
   next if line =~ /^#/
-  from,to = line.split(";")
+  from, to = line.split(';')
   puts "adding #{from} -> #{to}" if options[:verbose]
-  Rewritten.add_translation(from,to.chomp)
+  Rewritten.add_translation(from, to.chomp)
 end
-
-

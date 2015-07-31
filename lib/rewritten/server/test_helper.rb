@@ -7,10 +7,10 @@ module Resque
       include Rack::Test::Methods
       def app
         Resque::Server.new
-      end 
+      end
 
       def self.should_respond_with_success
-        test "should respond with success" do
+        test 'should respond with success' do
           assert last_response.ok?, last_response.errors
         end
       end

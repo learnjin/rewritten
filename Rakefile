@@ -3,7 +3,7 @@ require 'rake/testtask'
 require 'rdoc/task'
 
 desc 'Default: run all tests'
-task :default => :test
+task default: :test
 
 Bundler::GemHelper.install_tasks
 
@@ -23,7 +23,3 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('HISTORY.rdoc')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
-
-
-
-

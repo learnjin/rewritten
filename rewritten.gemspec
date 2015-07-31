@@ -1,32 +1,32 @@
 # -*- encoding: utf-8 -*-
-$:.push File.expand_path("../lib", __FILE__)
-require "rewritten/version"
+$LOAD_PATH.push File.expand_path('../lib', __FILE__)
+require 'rewritten/version'
 
 Gem::Specification.new do |s|
-  s.name        = "rewritten"
+  s.name        = 'rewritten'
   s.version     = Rewritten::VERSION
-  s.authors     = ["Kai Rubarth"]
-  s.email       = ["kai@doxter.de"]
-  s.homepage    = ""
-  s.summary     = %q{A redis-based URL rewriting engine}
+  s.authors     = ['Kai Rubarth']
+  s.email       = ['kai@doxter.de']
+  s.homepage    = ''
+  s.summary     = 'A redis-based URL rewriting engine'
 
-  s.rubyforge_project = "rewritten"
+  s.rubyforge_project = 'rewritten'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  s.require_paths = ["lib"]
+  s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
+  s.require_paths = ['lib']
 
-  s.add_dependency "redis-namespace"
-  s.add_dependency "vegas",           "~> 0.1.2"
-  s.add_dependency "sinatra",         ">= 0.9.2"
-  s.add_dependency "multi_json",      "~> 1.0"
-  s.add_dependency "activesupport"
+  s.add_dependency 'redis-namespace'
+  s.add_dependency 'vegas',           '~> 0.1.2'
+  s.add_dependency 'sinatra',         '>= 0.9.2'
+  s.add_dependency 'multi_json',      '~> 1.0'
+  s.add_dependency 'activesupport'
 
-  s.add_development_dependency "rake"
-  s.add_development_dependency "minitest"
-  s.add_development_dependency "pry"
-  s.add_development_dependency "coveralls"
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'minitest'
+  s.add_development_dependency 'pry'
+  s.add_development_dependency 'coveralls'
 
   s.description = <<description
     Rewritten is a lookup-based rewriting engine that rewrites requested
@@ -46,7 +46,4 @@ Gem::Specification.new do |s|
     4. A Rack app for substituting URLs in HTML pages with their current translation (Rack::Rewritten::Html)
     5. A Rack app for recording successful request (Rack::Rewritten::Record)
 description
-
 end
-
-
