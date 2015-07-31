@@ -1,16 +1,14 @@
 require 'test_helper'
 
 describe Rack::Rewritten::Url do
-
-  before {
+  before do
     Rewritten.add_translation '/foo/bar', '/products/1'
     Rewritten.add_translation '/foo/baz', '/products/1'
     Rewritten.add_translation '/foo/with/params', '/products/2?w=1'
-  }
+  end
 
-  describe "substition behavior" do
-
-    before {
+  describe 'substition behavior' do
+    before do
       @html_body = <<-HTML
       <html>
         <body>
@@ -25,25 +23,22 @@ describe Rack::Rewritten::Url do
       </html>
       HTML
 
-      @rack = Rack::Rewritten::Html.new(lambda{|env| [200, {}, [@html_body]]})
-    }
+      @rack = Rack::Rewritten::Html.new(->(_env) { [200, {}, [@html_body]] })
+    end
 
-    it "must ignore everything" do
-      res,env,body = @rack.call({})
-      html = body.join("")
+    it 'must ignore everything' do
+      _res, _env, body = @rack.call({})
+      html = body.join('')
       html.must_equal @html_body
     end
 
-    it "must replace links with translations" do
-      Rewritten.add_translation('/bar', '/foo') 
-      res,env,body = @rack.call({})
-      html = body.join("")
-      assert ! (html =~ (/foo\??["']/) ), "didn't replace all /foo links"
-      assert html.include? "/bar"
-      assert html.include?("/foolmenot"), "must not mess with similar links"
+    it 'must replace links with translations' do
+      Rewritten.add_translation('/bar', '/foo')
+      _res, _env, body = @rack.call({})
+      html = body.join('')
+      assert ! (html =~ (/foo\??["']/)), "didn't replace all /foo links"
+      assert html.include? '/bar'
+      assert html.include?('/foolmenot'), 'must not mess with similar links'
     end
-
   end
-
 end
-

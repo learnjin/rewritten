@@ -1,11 +1,8 @@
 require 'rack'
 
 module Rack
-
   module Rewritten
-
     class Html
-
       def initialize(app)
         @app = app
       end
@@ -20,15 +17,13 @@ module Rack
             links = line.scan(/href="([^"]+)"/).flatten.uniq
             res = line
             links.each do |link|
-
               if ::Rewritten.exist_translation_for?(link)
                 t = ::Rewritten.get_current_translation(link)
-                res.gsub!(%Q|href="#{link}"|, %Q|href="#{t}"|) if t
-                res.gsub!(%Q|href='#{link}'|, %Q|href='#{t}'|) if t
-                res.gsub!(%Q|href="#{link}?|, %Q|href="#{t}?|) if t
-                res.gsub!(%Q|href='#{link}?|, %Q|href='#{t}?|) if t
+                res.gsub!(%(href="#{link}"), %(href="#{t}")) if t
+                res.gsub!(%(href='#{link}'), %(href='#{t}')) if t
+                res.gsub!(%(href="#{link}?), %(href="#{t}?)) if t
+                res.gsub!(%(href='#{link}?), %(href='#{t}?)) if t
               end
-
             end
             new_response << res
           end
@@ -38,10 +33,6 @@ module Rack
 
         [status, headers, new_response]
       end
-
     end
-
   end
 end
-
-

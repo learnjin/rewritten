@@ -1,3 +1,7 @@
+== 0.16.0
+  
+  * Makes rewritten work with fullpath. Example: Matching on '/some/url?q=1' will work now
+
 == 0.15.2 
 
   * Fixes nested parameters
