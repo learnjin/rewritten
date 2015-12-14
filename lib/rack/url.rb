@@ -8,6 +8,7 @@ module Rack
       def initialize(app, &block)
         @app = app
         @translate_backwards = false
+        @translate_backwards_exceptions = []
         @downcase_before_lookup = false
         @translate_partial = false
         @base_url = ''
@@ -36,7 +37,7 @@ module Rack
           r = Rack::Response.new
           r.redirect(target_url, 301)
           r.finish
-        elsif ::Rewritten.includes?(req.fullpath) || ::Rewritten.includes?(path.chomp('/')) || backwards = (translate_backwards? && ::Rewritten.exist_translation_for?(path))
+        elsif ::Rewritten.includes?(req.fullpath) || ::Rewritten.includes?(path.chomp('/')) || backwards = (translate_backwards?(path) && ::Rewritten.exist_translation_for?(path))
 
           to = ::Rewritten.includes?(req.fullpath)
           to ||= ::Rewritten.includes?(path.chomp('/')) || path
@@ -80,11 +81,18 @@ module Rack
 
       private
 
-      def translate_backwards?
-        @translate_backwards
+      def translate_backwards?(path)
+        return false unless @translate_backwards
+
+        @translate_backwards_exceptions.each do |exception|
+          return false if path.index(exception) == 0
+        end
+
+        true
       end
 
       attr_writer :translate_backwards
+      attr_accessor :translate_backwards_exceptions
 
       def downcase_before_lookup?
         @downcase_before_lookup
