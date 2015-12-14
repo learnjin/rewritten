@@ -181,6 +181,19 @@ describe Rack::Rewritten::Url do
         ret[0].must_equal 301
         ret[1]['Location'].must_equal 'http://www.example.org/foo/baz'
       end
+
+      it 'must not redirect from resource url to nice url if enabled but in exceptions' do
+        @rack = Rack::Rewritten::Url.new(@app) do
+          self.translate_backwards = true
+          self.translate_backwards_exceptions = ['/products']
+        end
+
+        @app.expect :call, [200, { 'Content-Type' => 'text/plain' }, ['']], [Hash]
+        ret = @rack.call request_url('/products/1')
+        @app.verify
+        ret[0].must_equal 200
+      end
+
     end
 
     describe 'flag behavior' do
