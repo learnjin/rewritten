@@ -247,7 +247,8 @@ module Rewritten
   def appendix(some_from)
     base = base_from(some_from) || ''
     result = some_from.partition(base).last
-    result.chomp('/')
+    return '' if result == ''
+    result.split('?').first.chomp('/')
   end
 
   def get_flag_string(from)
