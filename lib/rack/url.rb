@@ -51,7 +51,7 @@ module Rack
             # if this is the current path, rewrite path and parameters
             tpath, tparams = split_to_path_params(to)
             env['QUERY_STRING'] = Rack::Utils.build_nested_query(tparams.merge(req.params))
-            req.path_info = tpath + ::Rewritten.appendix(req.path_info)
+            req.path_info = tpath + ::Rewritten.appendix(req.fullpath)
             @app.call(req.env)
           else
             # if this is not the current path, redirect to current path
