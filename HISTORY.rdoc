@@ -1,3 +1,7 @@
+== 0.16.3
+
+  * Fix malformed path_info that contained query_string
+
 == 0.16.2
 
   * Fix bug with query parameter translations without naked path_info translations
