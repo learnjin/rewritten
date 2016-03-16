@@ -134,7 +134,20 @@ describe Rack::Rewritten::Url do
     end
 
     describe '/ behavior' do
-      it 'must 301 redirect paths with / in the end to their chomped version' do
+      it 'must 301 redirect current paths with / in the end to their chomped version' do
+        ret = @rack.call request_url('/foo/baz/')
+        @app.verify
+        ret[0].must_equal 301
+        ret[1]['Location'].must_equal 'http://www.example.org/foo/baz'
+      end
+
+      it 'wont 301 redirect /' do
+        @app.expect :call, [200, { 'Content-Type' => 'text/plain' }, ['']], [Hash]
+        ret = @rack.call request_url('/')
+        @app.verify
+      end
+
+      it 'must 301 redirect paths with / in the end to their current chomped version' do
         ret = @rack.call request_url('/foo/bar/')
         @app.verify
         ret[0].must_equal 301
