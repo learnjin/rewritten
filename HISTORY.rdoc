@@ -1,3 +1,7 @@
+== 0.16.2
+
+  * Fix bug with query parameter translations without naked path_info translations
+
 == 0.16.1
 
   * include exception list for reverse translations
