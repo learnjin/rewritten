@@ -47,6 +47,20 @@ module Rack
           current_path_with_query = current_path
           current_path = current_path.split('?')[0]
 
+          if current_path.size + 1 == req.path_info.size and current_path == req.path_info.chomp('/')
+            r = Rack::Response.new
+
+            new_path = env['rack.url_scheme'].dup
+            new_path << '://'
+            new_path << env['HTTP_HOST'].dup.sub(/^#{subdomain.chomp(':')}\./, '')
+            new_path << current_path
+            new_path << ::Rewritten.appendix(path) unless backwards
+            new_path << '?' << env['QUERY_STRING'] unless (env['QUERY_STRING'] || '').empty?
+
+            r.redirect(new_path, 301)
+            return r.finish
+          end
+
           if (req.fullpath == current_path_with_query || current_path == req.path_info) || (::Rewritten.base_from(req.path_info) == current_path) || ::Rewritten.flag?(path, 'L')
             # if this is the current path, rewrite path and parameters
             tpath, tparams = split_to_path_params(to)
