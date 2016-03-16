@@ -265,5 +265,13 @@ describe Rack::Rewritten::Url do
       @rack.call(@initial_args)
       @initial_args['PATH_INFO'].must_equal '/embed/2'
     end
+
+    it 'must be possible to pass extra parameters not in translation' do
+      Rewritten.add_translation '/foo/without/params', '/embed/2'
+      @initial_args.merge!('QUERY_STRING' => 'w=1', 'REQUEST_URI' => '/foo/without/params', 'PATH_INFO' => '/foo/without/params')
+      @rack.call(@initial_args)
+      @initial_args['PATH_INFO'].must_equal '/embed/2'
+      @initial_args['QUERY_STRING'].must_equal 'w=1'
+    end
   end
 end
