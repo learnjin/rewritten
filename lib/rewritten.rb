@@ -140,7 +140,7 @@ module Rewritten
   end
 
   def add_translations(to, froms)
-    froms.each { |from|  add_translation(from, to) }
+    froms.each { |from| add_translation(from, to) }
   end
 
   def num_translations(to)

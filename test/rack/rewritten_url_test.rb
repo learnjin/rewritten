@@ -193,7 +193,6 @@ describe Rack::Rewritten::Url do
         @app.verify
         ret[0].must_equal 200
       end
-
     end
 
     describe 'flag behavior' do
@@ -256,6 +255,13 @@ describe Rack::Rewritten::Url do
 
     it 'must discriminate between explicit query string translations' do
       @initial_args.merge!('QUERY_STRING' => 'w=1')
+      @rack.call(@initial_args)
+      @initial_args['PATH_INFO'].must_equal '/embed/2'
+    end
+
+    it 'must translate if the only translation is a parameter translation' do
+      Rewritten.add_translation '/foo/two/params?w=1', '/embed/2'
+      @initial_args.merge!('QUERY_STRING' => 'w=1', 'REQUEST_URI' => '/foo/two/params', 'PATH_INFO' => '/foo/two/params')
       @rack.call(@initial_args)
       @initial_args['PATH_INFO'].must_equal '/embed/2'
     end
