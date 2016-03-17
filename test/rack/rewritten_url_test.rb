@@ -141,13 +141,21 @@ describe Rack::Rewritten::Url do
         ret[1]['Location'].must_equal 'http://www.example.org/foo/baz'
       end
 
+      it 'must 301 redirect current paths with / before the query string to their chomped version' do
+        Rewritten.add_translation '/path/with/params?w=1', '/embed/2'
+        ret = @rack.call request_url('/path/with/params/', 'QUERY_STRING' => 'w=1')
+        @app.verify
+        ret[0].must_equal 301
+        ret[1]['Location'].must_equal 'http://www.example.org/path/with/params?w=1'
+      end
+
       it 'wont 301 redirect /' do
         @app.expect :call, [200, { 'Content-Type' => 'text/plain' }, ['']], [Hash]
         ret = @rack.call request_url('/')
         @app.verify
       end
 
-      it 'must 301 redirect paths with / in the end to their current chomped version' do
+      it 'must 301 redirect non-current paths with / in the end to their current chomped version' do
         ret = @rack.call request_url('/foo/bar/')
         @app.verify
         ret[0].must_equal 301

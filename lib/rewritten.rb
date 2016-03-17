@@ -41,11 +41,7 @@ module Rewritten
     end
   end
 
-  attr_writer :translate_partial
-
-  def translate_partial?
-    @translate_partial
-  end
+  attr_accessor :translate_partial
 
   # Returns the current Redis connection. If none has been created, will
   # create a new one.
@@ -194,7 +190,7 @@ module Rewritten
     translation = Rewritten.z_range("to:#{uri.path}", -1) unless translation
 
     if translation.nil?
-      if translate_partial? && path.count('/') > 1
+      if translate_partial && path.count('/') > 1
         parts = path.split('/')
         shorter_path = parts.slice(0, parts.size - 1).join('/')
         appendix = parts.last + (tail ? '/' + tail : '')
@@ -221,7 +217,7 @@ module Rewritten
     to = translate(conjugated)
     to = translate(conjugated.split('?')[0]) unless to
 
-    if to.nil? && translate_partial? && conjugated.count('/') > 1
+    if to.nil? && translate_partial && conjugated.count('/') > 1
       parts = conjugated.split('/')
       shorter_path = parts.slice(0, parts.size - 1).join('/')
       infinitive(shorter_path)
@@ -238,7 +234,7 @@ module Rewritten
       some_from
     elsif translate(base_from)
       base_from
-    elsif translate_partial? && base_from.count('/') > 1
+    elsif translate_partial && base_from.count('/') > 1
       parts = base_from.split('/')
       base_from(parts.slice(0, parts.size - 1).join('/'))
         end
@@ -287,7 +283,7 @@ module Rewritten
     result = Rewritten.redis.hget("from:#{path.chomp('/')}", :to)
     result = Rewritten.redis.hget("from:#{path.split('?')[0]}", :to) unless result
 
-    if result.nil? && translate_partial? && path.count('/') > 1
+    if result.nil? && translate_partial && path.count('/') > 1
       parts = path.split('/')
       includes?(parts.slice(0, parts.size - 1).join('/'))
     else

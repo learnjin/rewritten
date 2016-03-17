@@ -29,17 +29,19 @@ module Rack
         subdomain = env['SUBDOMAIN'] ? "#{env['SUBDOMAIN']}:" : ''
 
         path = "#{subdomain}#{req.path_info}"
-        path.downcase! if downcase_before_lookup?
+        path.downcase! if downcase_before_lookup
 
         target_url = ::Rewritten.translate(path)
+
+        chomped_fullpath = req.fullpath.split('?').map { |s| s.chomp('/') }.join('?')
 
         if external_target?(target_url)
           r = Rack::Response.new
           r.redirect(target_url, 301)
           r.finish
-        elsif ::Rewritten.includes?(req.fullpath) || ::Rewritten.includes?(path.chomp('/')) || backwards = (translate_backwards?(path) && ::Rewritten.exist_translation_for?(path))
+        elsif ::Rewritten.includes?(chomped_fullpath) || ::Rewritten.includes?(path.chomp('/')) || backwards = (translate_backwards?(path) && ::Rewritten.exist_translation_for?(path))
 
-          to = ::Rewritten.includes?(req.fullpath)
+          to = ::Rewritten.includes?(chomped_fullpath)
           to ||= ::Rewritten.includes?(path.chomp('/')) || path
 
           current_path = ::Rewritten.get_current_translation(to)
@@ -54,18 +56,18 @@ module Rack
             new_path << '://'
             new_path << env['HTTP_HOST'].dup.sub(/^#{subdomain.chomp(':')}\./, '')
             new_path << current_path
-            new_path << ::Rewritten.appendix(path) unless backwards
+            new_path << ::Rewritten.appendix(chomped_fullpath) unless backwards
             new_path << '?' << env['QUERY_STRING'] unless (env['QUERY_STRING'] || '').empty?
 
             r.redirect(new_path, 301)
             return r.finish
           end
 
-          if (req.fullpath == current_path_with_query || current_path == req.path_info) || (::Rewritten.base_from(req.path_info) == current_path) || ::Rewritten.flag?(path, 'L')
+          if (chomped_fullpath == current_path_with_query || current_path == req.path_info) || (::Rewritten.base_from(req.path_info) == current_path) || ::Rewritten.flag?(path, 'L')
             # if this is the current path, rewrite path and parameters
             tpath, tparams = split_to_path_params(to)
             env['QUERY_STRING'] = Rack::Utils.build_nested_query(tparams.merge(req.params))
-            req.path_info = tpath + ::Rewritten.appendix(req.fullpath)
+            req.path_info = tpath + ::Rewritten.appendix(chomped_fullpath)
             @app.call(req.env)
           else
             # if this is not the current path, redirect to current path
@@ -107,16 +109,7 @@ module Rack
 
       attr_writer :translate_backwards
       attr_accessor :translate_backwards_exceptions
-
-      def downcase_before_lookup?
-        @downcase_before_lookup
-      end
-
-      attr_writer :downcase_before_lookup
-
-      def translate_partial?
-        @translate_partial
-      end
+      attr_accessor :downcase_before_lookup
 
       def translate_partial=(yes_or_no)
         $stderr.puts 'DEPRECATED. Please use Rewritten.translate_partial'
