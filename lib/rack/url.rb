@@ -109,16 +109,7 @@ module Rack
 
       attr_writer :translate_backwards
       attr_accessor :translate_backwards_exceptions
-
-      def downcase_before_lookup?
-        @downcase_before_lookup
-      end
-
-      attr_writer :downcase_before_lookup
-
-      def translate_partial?
-        @translate_partial
-      end
+      attr_accessor :downcase_before_lookup
 
       def translate_partial=(yes_or_no)
         $stderr.puts 'DEPRECATED. Please use Rewritten.translate_partial'
